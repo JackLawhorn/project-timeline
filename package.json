@@ -2,7 +2,7 @@
   "name": "project-timeline",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://jacklawhorn.github.io/project-timeline/",
+  "homepage": "http://jacklawhorn.github.io/project-timeline/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
@@ -15,11 +15,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -40,6 +40,7 @@
     ]
   },
   "devDependencies": {
+    "gh-pages": "^3.1.0",
     "github-pages": "^3.0.2"
   }
 }
