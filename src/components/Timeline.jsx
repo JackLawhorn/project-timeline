@@ -250,7 +250,7 @@ class Timeline extends React.Component {
                 <ul className="timeline" zoomed={this.state.zoom > 1 ? "zoomed" : undefined}
                     onMouseDown={handleTrack} onMouseMove={handleTrack} onWheel={handleScroll}>
                     {
-                        trackPosn >= 0 &&
+                        trackPosn >= scrollPosn &&
                             <div className="timeline-tracker" posn={trackPosn}
                                  style={{ "left": trackCoord + "px" }} />
                     }
