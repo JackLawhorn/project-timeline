@@ -1,0 +1,365 @@
+////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                        //
+//                                     Style generics                                     //
+//                                                                                        //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+body {
+    margin: 0px;
+    padding: 0px;
+
+    font-family: sans-serif;
+    overflow-x: hidden;
+    
+    * {
+        position: relative;
+        box-sizing: border-box;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                        //
+//                                          Main                                          //
+//                                                                                        //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+.timeline-container {
+    width: 100%;
+    max-height: 40%;
+    padding: 0px 30px 0px 15px;
+    overflow-x: hidden;
+
+    background-color: #222;
+    cursor: pointer;
+    
+    & > .timeline {
+        display: table;
+        margin: 0px 0px 55px;
+        padding: 15px 0px;
+        overflow-x: scroll;
+        
+        list-style: none;
+        user-select: none;
+        -webkit-user-drag: none;
+
+        &[zoomed] {
+            padding-bottom: 31px;
+        }
+        
+        & > div.timeline-tracker {
+            display: block;
+            width: 2px;
+            height: 100%;
+            position: absolute;
+            top: 0px;
+
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateX(1px);
+
+            pointer-events: none;
+        }
+        
+        & > .timeline-item {
+            display: table-row;
+            max-width: calc(100%);
+
+            & > * {
+                display: table-cell;
+                vertical-align: middle;
+                white-space: nowrap;
+            }
+            
+            &.ruler-container > .ruler {
+                height: 16px;
+                padding: 0px 0px 30px 0px;
+                position: sticky;
+                top: 15px;
+            
+                filter: drop-shadow(0px 0px 2px black);
+            
+                z-index: 1000px;
+                
+                & > .rule::before {
+                    content: attr(posn);
+                    display: block;
+                    position: absolute;
+                    top: 0px;
+                
+                    color: white;
+                    transform: translateX(-50%);
+                }
+            }
+
+            & > .line-label {
+                font-weight: bold;
+                text-align: left;
+                max-width: 10vw;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            & > .line-toggle {
+                margin: 14px 30px 14px 15px;
+                cursor: pointer;
+                transition: 0.2s ease;
+                
+                &:after {
+                    content: '';
+                    display: flex;
+                    justify-content: center;
+                    align-content: center;
+                    width: 16px;
+                    height: 16px;
+                    position: absolute;
+                    top: -2px;
+                    left: -2px;
+                
+                    color: white;
+                    line-height: 1em;
+                    background-color: white;
+                    border-radius: 4px;
+                }
+                &:checked::after {
+                    content: '\25A0';
+                    background-color: inherit;
+                }
+
+                &:checked,
+                &:checked ~ .line-container[tracked] > .line::before,
+                &:checked ~ .line-container[tracked] > .line::after,
+                &:checked ~ .line-container[tracked] > .line-event {
+                    transform: scale(1.25);
+                }
+                &:checked ~ .line-container[tracked] > .line > .line-label {
+                    transform: scale(1.1);
+                }
+            }
+
+            & > .line-container {
+                width: calc(100%);
+
+                & > .line {
+                    position: absolute;
+                    top: calc(50% - 4px);
+                    height: 8px;
+                
+                    color: white;
+                    text-align: center;
+                    text-shadow: 0px 0px 2px black;
+                
+                    filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
+                    
+                    &[startvisible]::before, &[endvisible]::after {
+                        content: '';
+                        display: block;
+                        position: absolute;
+                        height: 20px;
+                        width: 8px;
+                        top: -6px;
+                        
+                        background: inherit;
+                        border-radius: 50px;
+                        transition: 0.2s ease;
+                    }
+                    &::before {
+                        left: -4px;
+                    }
+                    &::after {
+                        right: -4px;
+                    }
+                }
+
+                & > .line-event {
+                    padding: 6px;
+                    margin-left: -6px;
+                    position: absolute;
+                    top: 12.5px;
+                
+                    text-shadow: none;
+                    background-color: inherit;
+                    border: 2px solid white;
+                    // border-radius: 50%;
+                    box-sizing: border-box;
+                    
+                    filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
+                    transition: transform 0.2s ease;
+                
+                    z-index: 2;
+                
+                    &:hover, &:focus, &[isselected] {
+                        z-index: 1000;
+                    }
+
+                    &:hover:not(:active), &:focus:not(:active), &[isSelected]:not(:active) {
+                        &::before, &::after {
+                            content: '';
+                            display: block;
+                            position: absolute;
+                        
+                            transform: translateX(-50%);
+                            
+                            z-index: 1000;
+                        }
+                        &::before {
+                            width: 0px; 
+                            height: 0px;
+                            top: calc(100% + 0.5px);
+                        
+                            border-left: 6px solid transparent;
+                            border-right: 6px solid transparent;
+                            border-bottom: 6px solid white;
+                        }
+                        &::after {
+                            content: attr(label) ' (' attr(posn) ')';
+                            width: max-content;
+                            padding: 2px 4px;
+                            top: calc(100% + 5.5px);
+                        
+                            color: #333;
+                            font-size: 0.66rem;
+                            background-color: white;
+                            border-radius: 4px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    & > .timeline-bottom {
+        width: 100%;
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+
+        & > .timeline-scrollbar {
+            height: 8px;
+            margin-bottom: 8px;
+
+            & > .scrollbar-thumb {
+                height: 100%;
+                position: absolute;
+
+                background: rgba(255, 255, 255, 0.25);
+                border-radius: 50px;
+            }
+        }
+
+        & > .timeline-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100%;
+            padding: 15px;
+            // box-sizing: border-box;
+        
+            font-family: monospace !important;
+            background: inherit;
+            box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.25);
+        
+            z-index: 1000;
+        
+            & > * {
+                display: inline-block;
+                vertical-align: middle;
+            }
+            & > * + * {
+                margin-left: 10px;
+            }
+        
+            & > button {
+                padding: 4px 8px;
+                
+                color: white;
+                background: inherit;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                border-radius: 4px;
+                outline: none;
+                cursor: pointer;
+                
+                filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
+            
+                &:hover:not(:active), &:focus:not(:active) {
+                    border-color: rgba(255, 255, 255, 1);
+                }
+            
+                &.zoom-in + span {
+                    color: white;
+                    
+                    &::after {
+                        content: '– ' attr(zoom) '%';
+                        display: inline-block;
+                        margin-left: 1ch;
+                    }
+                }
+            
+                &.clear-button {
+                    border-color: rgba(255, 0, 0, 0.5);
+                    color: red;
+
+                    &:hover:not(:active), &:focus:not(:active) {
+                        border-color: rgba(255, 0, 0, 1) !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                        //
+//                                   Complex overrides                                    //
+//                                                                                        //
+////////////////////////////////////////////////////////////////////////////////////////////
+
+.timeline > .timeline-item {
+    // Account for line-events on last line
+    &:last-of-type > .line-container > .line-event:hover:not(:active),
+    &:last-of-type > .line-container > .line-event:focus:not(:active),
+    &:last-of-type > .line-container > .line-event[isselected]:not(:active) {
+        &::before {
+            top: unset !important;
+            bottom: calc(100% + 0.5px);
+        
+            border-bottom: none !important;
+            border-top: 6px solid white;
+        }
+        &::after {
+            top: unset !important;
+            bottom: calc(100% + 5.5px);
+        }
+    }
+
+    // Toggled/tracked lines
+    & > .line-container:not([tracked]) > .line,
+    & > .line-container:not([tracked]) > .line-event:not([isselected]):not(:hover),
+    & > .line-toggle:not(:checked) + .line-container > .line,
+    & > .line-toggle:not(:checked) + .line-container > .line-event:not([isselected]):not(:hover) {
+        opacity: 0.25;
+    }
+    & > .line-container:not([tracked]) > .line-event:not([isselected]):not(:hover),
+    & > .line-toggle:not(:checked) + .line-container > .line-event:not([isselected]):not(:hover) {
+        background: transparent !important;
+    }
+
+    // UI pop-in when active
+    & > .line-container > .line-event:hover:not(:active),
+    & > .line-container > .line-event:active:not(:active),
+    & > .line-container > .line-event[isselected]:not(:active),
+    & > .line-toggle:hover:not(:active) {
+        transform: scale(1.5) !important;
+    }
+
+    & > .line-container:not([tracked]) {
+        height: 0px !important;
+        transition: 0.2s ease;
+    }
+}
+
+// Handle scroll visibility
+.timeline-container > .timeline > .timeline-item {
+    & > .ruler > .rule:not([posnvisible]),
+    & > .line-container > .line-event:not([posnvisible]) {
+        display: none;
+    }
+}
