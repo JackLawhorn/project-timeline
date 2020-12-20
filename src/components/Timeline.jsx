@@ -1,6 +1,10 @@
 import React from 'react';
 import $ from 'jquery';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faTimesCircle } from '@fortawesome/free-regular-svg-icons';
+
 class Timeline extends React.Component {
     constructor(props) {
         super(props);
@@ -21,6 +25,7 @@ class Timeline extends React.Component {
             zoom: 1,
             scrollPosn: 0,
             resizeTicker: 0,
+            mouseDown: false,
         }
         this.handleSelect = props.handleSelect;
 
@@ -114,23 +119,31 @@ class Timeline extends React.Component {
     }
 
     handleTrack(e) {
-        if(e.type === "click" || e.buttons === 1) {
-            if($(e.target).hasClass("line-event")) this.handleSelectEvent(e); 
+        if((e.buttons === 1 || e.type === "click")) {
+            if($(e.target).hasClass("line-event")) this.handleSelectEvent(e);
             else {
                 const totalLength = this.totalLength(),
                       earliestDate = this.state.earliestDate,
+                    //   latestDate = this.state.latestDate,
                       zoom = this.state.zoom,
                       scrollPosn = this.state.scrollPosn,
+                      
                       x = e.clientX,
                       linesLeft = $("ul.timeline > li > .line-container").position().left,
                       linesWidth = $("ul.timeline > li > .line-container").width(),
                       linesPadding = 15;
                 var trackPosn = this.state.trackPosn + 0,
-                    trackedArray = Array(this.state.lines.length).fill(true);
+                    trackedArray = Array(this.state.lines.length).fill(true); //,
+                    // scrollDelta = 0;
 
                 if(x - linesLeft - linesPadding >= 0) {
-                    trackPosn = (totalLength/zoom*(x-linesLeft-linesPadding)/(linesWidth/zoom)+Math.max(earliestDate, scrollPosn)).toFixed(2);
-                    
+                    trackPosn = totalLength/zoom*(x-linesLeft-linesPadding)/(linesWidth/zoom)+Math.max(earliestDate, scrollPosn);
+
+                    // if(trackPosn < scrollPosn + 10/zoom)
+                    //     scrollDelta += -1*totalLength/100;
+                    // else if(trackPosn > totalLength - 10/zoom)
+                    //     scrollDelta += totalLength/100;
+
                     this.state.lines.forEach(function(line, i) {
                         if(line.start > trackPosn || line.end < trackPosn)
                             trackedArray[i] = false;
@@ -139,7 +152,8 @@ class Timeline extends React.Component {
                     this.setState({
                         trackPosn: trackPosn,
                         trackedArray: trackedArray,
-                        selectedEvent: { timeline: null, event: null }, 
+                        selectedEvent: { timeline: null, event: null },
+                        // scrollPosn: Math.min(latestDate - totalLength, Math.max(earliestDate, scrollPosn + scrollDelta)),
                     }, function() { this.handleSelect(this.state.selectedEvent); });
                 }
             }
@@ -176,16 +190,26 @@ class Timeline extends React.Component {
     }
 
     handleZoomIn() {
-        const zoom = this.state.zoom;
+        const totalLength = this.totalLength() * this.state.zoom,
+              oldZoom = this.state.zoom + 0,
+              scrollPosn = this.state.scrollPosn + 0;
+        const newZoom = Math.min(2, oldZoom + 0.1);
+
         this.setState({
-            zoom: Math.min(zoom + 0.1, 2),
+            zoom: newZoom,
+            scrollPosn: Math.max(0, Math.min(totalLength - (totalLength/newZoom), scrollPosn*newZoom/oldZoom)),
         });
     }
 
     handleZoomOut() {
-        const zoom = this.state.zoom;
+        const totalLength = this.totalLength() * this.state.zoom,
+              oldZoom = this.state.zoom + 0,
+              scrollPosn = this.state.scrollPosn + 0;
+        const newZoom = Math.max(1, oldZoom - 0.1);
+
         this.setState({
-            zoom: Math.max(1, zoom - 0.1),
+            zoom: newZoom,
+            scrollPosn: Math.max(0, Math.min(totalLength - (totalLength/newZoom), scrollPosn*newZoom/oldZoom)),
         });
     }
 
@@ -246,9 +270,11 @@ class Timeline extends React.Component {
         allDates.sort((a, b) => a-b);
 
         return (
-            <div className="timeline-container">
-                <ul className="timeline" zoomed={this.state.zoom > 1 ? "zoomed" : undefined}
-                    onMouseDown={handleTrack} onMouseMove={handleTrack} onWheel={handleScroll}>
+            <div className="timeline-container" onWheel={handleScroll}
+                 onMouseDown={(e) => this.setState({ mouseDown: e.target, })}
+                 onMouseUp={(e) => {this.setState({ mouseDown: null, })}}>
+                <ul className="timeline" onMouseDown={handleTrack} onMouseMove={handleTrack}
+                    dragging={this.state.mouseDown !== null ? "dragging" : undefined}>
                     {
                         trackPosn >= scrollPosn &&
                             <div className="timeline-tracker" posn={trackPosn}
@@ -299,24 +325,34 @@ class Timeline extends React.Component {
                     }
                 </ul>
                 <div className="timeline-bottom">
-                    {
-                        zoom > 1 &&
-                            <div className="timeline-scrollbar">
-                                <div className="scrollbar-thumb"
-                                    style={{ "left": 100*scrollPosn/(totalLength*zoom) + "%",
-                                             "width": "calc(" + 100/zoom + "% - " + linesLeft + "px)",
-                                             "marginLeft": linesLeft, }} />
-                            </div>
-                    }
+                    <div className="timeline-scrollbar">
+                        <div className="scrollbar-thumb"
+                            style={{ "left": 100*scrollPosn/(totalLength*zoom) + "%",
+                                        "width": "calc(" + 100/zoom + "% - " + linesLeft + "px)",
+                                        "marginLeft": linesLeft, }} />
+                    </div>
                     <div className="timeline-controls">
-                        <button className="zoom-in" onMouseDown={handleZoomIn}>+</button>
-                        <span zoom={Math.round(this.state.zoom*100)}>Zoom</span>
-                        <button className="zoom-out" onMouseDown={handleZoomOut}>&minus;</button>
+                        <button className="save-button">
+                            <FontAwesomeIcon icon={faSave} />
+                            <span>Save file</span>
+                        </button>
+                        <span>
+                            <button className="zoom-in" onMouseDown={handleZoomIn}>+</button>
+                            <span zoom={Math.round(this.state.zoom*100)}>
+                                <FontAwesomeIcon icon={faSearch} />
+                                <span>{Math.floor(zoom*100) + "%"}</span>
+                            </span>
+                            <button className="zoom-out" onMouseDown={handleZoomOut}>&minus;</button>
+                        </span>
                         {
                             trackPosn >= 0 && (
-                                <button className="clear-button" onClick={handleClearSelected}>Clear selected</button>
+                                <button className="clear-button" onClick={handleClearSelected}>
+                                    <FontAwesomeIcon icon={faTimesCircle} />
+                                    <span>Clear selected</span>
+                                </button>
                             )
                         }
+                        { trackPosn === -1 && <div /> }
                     </div>
                 </div>
             </div>

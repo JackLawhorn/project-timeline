@@ -1,0 +1,13 @@
+[
+    {
+        "label": "Timeline A",
+        "start": 0,
+        "end": 50,
+        "color": "crimson",
+        "events": [
+            {
+                "label": "Event A"
+            }
+        ]
+    }
+]

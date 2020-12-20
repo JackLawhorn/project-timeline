@@ -1,9 +1,10 @@
-@charset "UTF-8";
 body {
   margin: 0px;
   padding: 0px;
-  font-family: sans-serif;
   overflow-x: hidden;
+  font-family: sans-serif;
+  color: white;
+  background: #170A1C;
 }
 
 body * {
@@ -12,19 +13,77 @@ body * {
           box-sizing: border-box;
 }
 
+body::-webkit-scrollbar {
+  display: none;
+}
+
+.splash-screen {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  height: 100%;
+  padding: 1.5rem;
+  color: white;
+}
+
+.splash-screen > * {
+  display: inline-block;
+  vertical-align: top;
+  width: calc(50% - 0.75rem);
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid white;
+  border-radius: 4px;
+}
+
+.splash-screen > * > h1 {
+  margin: 0px;
+  padding: 0px;
+  font-weight: normal;
+}
+
+.splash-screen > * > button {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 1rem;
+  color: white;
+  background: transparent;
+  border: 1px solid white;
+  cursor: pointer;
+}
+
+.splash-screen > .load-file-prompt > input {
+  display: none;
+}
+
 .timeline-container {
   width: 100%;
   max-height: 40%;
   padding: 0px 30px 0px 15px;
   overflow-x: hidden;
-  background-color: #222;
   cursor: pointer;
+}
+
+.timeline-container + div.blur {
+  width: 100%;
+  height: 8px;
+  position: absolute;
+  top: 100%;
+  background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(0, 0, 0, 0.15)), color-stop(rgba(0, 0, 0, 0.15)), color-stop(rgba(0, 0, 0, 0.15)), to(transparent));
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15), transparent);
+  -webkit-filter: blur(2px);
+          filter: blur(2px);
 }
 
 .timeline-container > .timeline {
   display: table;
   margin: 0px 0px 55px;
-  padding: 15px 0px;
+  padding: 15px 0px 19px;
   overflow-x: scroll;
   list-style: none;
   -webkit-user-select: none;
@@ -34,17 +93,17 @@ body * {
   -webkit-user-drag: none;
 }
 
-.timeline-container > .timeline[zoomed] {
-  padding-bottom: 31px;
+.timeline-container > .timeline[dragging] {
+  cursor: col-resize !important;
 }
 
-.timeline-container > .timeline > div.timeline-tracker {
+.timeline-container > .timeline > .timeline-tracker {
   display: block;
   width: 2px;
   height: 100%;
   position: absolute;
   top: 0px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.15);
   -webkit-transform: translateX(1px);
           transform: translateX(1px);
   pointer-events: none;
@@ -182,6 +241,7 @@ body * {
   border: 2px solid white;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
+  cursor: pointer !important;
   -webkit-filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
           filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
   -webkit-transition: -webkit-transform 0.2s ease;
@@ -220,7 +280,7 @@ body * {
   width: max-content;
   padding: 2px 4px;
   top: calc(100% + 5.5px);
-  color: #333;
+  color: #170A1C;
   font-size: 0.66rem;
   background-color: white;
   border-radius: 4px;
@@ -234,78 +294,95 @@ body * {
 }
 
 .timeline-container > .timeline-bottom > .timeline-scrollbar {
-  height: 8px;
-  margin-bottom: 8px;
+  height: 4px;
 }
 
 .timeline-container > .timeline-bottom > .timeline-scrollbar > .scrollbar-thumb {
   height: 100%;
-  position: absolute;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 50px;
+  background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(255, 255, 255, 0.15)), to(transparent));
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+  -webkit-filter: blur(2px);
+          filter: blur(2px);
 }
 
 .timeline-container > .timeline-bottom > .timeline-controls {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
   width: 100%;
-  padding: 15px;
-  font-family: monospace !important;
-  background: inherit;
-  -webkit-box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.25);
-          box-shadow: 0px -4px 8px rgba(0, 0, 0, 0.25);
+  height: 55px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-user-drag: none;
   z-index: 1000;
 }
 
+.timeline-container > .timeline-bottom > .timeline-controls svg + * {
+  margin-left: 5px !important;
+}
+
 .timeline-container > .timeline-bottom > .timeline-controls > * {
-  display: inline-block;
-  vertical-align: middle;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls > * + * {
-  margin-left: 10px;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > button {
-  padding: 4px 8px;
+.timeline-container > .timeline-bottom > .timeline-controls button {
+  margin: 0px;
+  padding: 0px;
+  font-size: 1rem;
   color: white;
-  background: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 4px;
+  background: transparent;
+  border: none;
   outline: none;
   cursor: pointer;
-  -webkit-filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
-          filter: drop-shadow(0px 0px 6px rgba(0, 0, 0, 0.25));
+  opacity: 0.5;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls > button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls > button:focus:not(:active) {
-  border-color: white;
+.timeline-container > .timeline-bottom > .timeline-controls button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls button:focus:not(:active) {
+  opacity: 1;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls > button.zoom-in + span {
-  color: white;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > button.zoom-in + span::after {
-  content: "– " attr(zoom) "%";
-  display: inline-block;
-  margin-left: 1ch;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > button.clear-button {
+.timeline-container > .timeline-bottom > .timeline-controls button.clear-button {
   border-color: rgba(255, 0, 0, 0.5);
   color: red;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls > button.clear-button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls > button.clear-button:focus:not(:active) {
+.timeline-container > .timeline-bottom > .timeline-controls button.clear-button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls button.clear-button:focus:not(:active) {
   border-color: red !important;
+}
+
+.timeline-container > .timeline-bottom > .timeline-controls > span {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  font-size: 1rem;
+  font-size: monospace;
+  color: white;
+}
+
+.timeline-container > .timeline-bottom > .timeline-controls > span > * + * {
+  margin-left: 10px;
+}
+
+.timeline-container > .timeline-bottom > .timeline-controls > span button {
+  padding: 2px 6px;
+  border: 1px solid white;
+  border-radius: 4px;
 }
 
 .timeline > .timeline-item:last-of-type > .line-container > .line-event:hover:not(:active)::before,

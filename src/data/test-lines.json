@@ -47,7 +47,7 @@
         "label": "Timeline E",
         "start": 37.5,
         "end": 62.5,
-        "color": "blueviolet",
+        "color": "MediumVioletRed ",
         "events": [
             {
                 "label": "Event E"
