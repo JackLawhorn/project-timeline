@@ -2,35 +2,43 @@ import React from 'react';
 import $ from 'jquery';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faSave } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faCopy, faSave } from '@fortawesome/free-solid-svg-icons';
 import { faTimesCircle } from '@fortawesome/free-regular-svg-icons';
 
 class Timeline extends React.Component {
-    constructor(props) {
+    constructor(props) {  
         super(props);
 
+        var lines = props.lines.concat([]);
+        lines.forEach(function(line, i) {
+            line.events.forEach(function(event, j) {
+                event.posn = Math.round(Math.random()*(line.end-line.start) + line.start);
+            })
+        });
+
         this.state = {
-            lines: props.lines,
+            lines: lines,
             selectedEvent: props.selectedEvent,
 
             earliestDate: 0,
             latestDate: 0,
-            allDates: [],
             disabledArray: Array(props.lines.length).fill(false),
             
             trackPosn: -1,
-            trackedArray: Array(props.lines.length).fill(true),
-            
-            hasMounted: false,
-            zoom: 1,
             scrollPosn: 0,
+            zoom: 1,
+            
             resizeTicker: 0,
-            mouseDown: false,
-        }
+            hasMounted: false,
+            mouseDown: null,
+            readyForTrack: true,
+        };
+
         this.handleSelect = props.handleSelect;
 
         this.totalLength = this.totalLength.bind(this);
         this.trackerCoord = this.trackerCoord.bind(this);
+        this.allDates = this.allDates.bind(this);
         this.updateTimeline = this.updateTimeline.bind(this);
         this.handleToggleLine = this.handleToggleLine.bind(this);
         this.handleTrack = this.handleTrack.bind(this);
@@ -39,32 +47,25 @@ class Timeline extends React.Component {
         this.handleZoomIn = this.handleZoomIn.bind(this);
         this.handleZoomOut = this.handleZoomOut.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.handleCopy = this.handleCopy.bind(this);
         
         this.renderLoad = this.renderLoad.bind(this);
         this.fullRender = this.fullRender.bind(this);
     }
     
     componentDidMount() {
-        var lines = this.state.lines.concat([]);
-        this.state.lines.forEach(function(line, i) {
-            line.events.forEach(function(event, j) {
-                event.posn = Math.round(Math.random()*(line.end-line.start) + line.start);
-            })
-        });
-
         var thisObj = this;
         window.addEventListener('resize', function() {
-            const resizeTicker = thisObj.state.resizeTicker + 0;
+            const resizeTicker = thisObj.state.resizeTicker;
             thisObj.setState({
                 resizeTicker: resizeTicker + 1,
             });
         });
 
         this.setState({
-            lines: lines,
             hasMounted: true,
         });
-
         this.updateTimeline();
     }
 
@@ -73,19 +74,30 @@ class Timeline extends React.Component {
     }
 
     trackerCoord() {
-        if($("ul.timeline > li > .line-container").position() !== undefined) {
-            const linesLeft = $("ul.timeline > li > .line-container").position().left,
-                  linesWidth = $("ul.timeline > li > .line-container").width();
+        if($("ul.timeline > .timeline-item > .line-container").position() !== undefined) {
+            const linesLeft = $("ul.timeline > .timeline-item > .line-container").position().left,
+                  linesWidth = $("ul.timeline > .timeline-item > .line-container").width();
     
-            return linesWidth*(this.state.trackPosn-Math.max(this.state.earliestDate,this.state.scrollPosn))/this.totalLength() + linesLeft;
+            return 10 + linesWidth*(this.state.trackPosn-Math.max(this.state.earliestDate,this.state.scrollPosn))/this.totalLength() + linesLeft;
         }
         else return 0;
     }
 
+    allDates() {
+        var allDates = [];
+
+        this.state.lines.forEach(function(line) {
+            if(allDates.indexOf(line.start) < 0) allDates.push(line.start);
+            if(allDates.indexOf(line.end) < 0) allDates.push(line.end);
+        });
+        allDates.sort((a, b) => a-b);
+
+        return allDates;
+    }
+
     updateTimeline() {
         var earliestDate = undefined,
-            latestDate = undefined,
-            allDates = [];
+            latestDate = undefined;
         this.state.lines.forEach(function(line) {
             if(earliestDate === undefined) {
                 earliestDate = line.start;
@@ -95,15 +107,11 @@ class Timeline extends React.Component {
                 if(line.start < earliestDate) earliestDate = line.start;
                 if(line.end > latestDate) latestDate = line.end;
             }
-            
-            if(allDates.indexOf(line.start) < 0) allDates.push(line.start);
-            if(allDates.indexOf(line.end) < 0) allDates.push(line.end);
         });
 
         this.setState({
             earliestDate: earliestDate,
             latestDate: latestDate,
-            allDates: allDates,
         });
     }
 
@@ -119,42 +127,39 @@ class Timeline extends React.Component {
     }
 
     handleTrack(e) {
-        if((e.buttons === 1 || e.type === "click")) {
+        var validEventTypes = ["click", "mousedown", "mousemove"];
+        if((validEventTypes.indexOf(e.type) >= 0 && e.buttons === 1) ||
+           (e.type==="touchmove" && this.state.readyForTrack)) {
             if($(e.target).hasClass("line-event")) this.handleSelectEvent(e);
             else {
                 const totalLength = this.totalLength(),
                       earliestDate = this.state.earliestDate,
-                    //   latestDate = this.state.latestDate,
+                      latestDate = this.state.latestDate,
                       zoom = this.state.zoom,
                       scrollPosn = this.state.scrollPosn,
                       
-                      x = e.clientX,
-                      linesLeft = $("ul.timeline > li > .line-container").position().left,
-                      linesWidth = $("ul.timeline > li > .line-container").width(),
-                      linesPadding = 15;
+                      linesLeft = $(".timeline > .timeline-item > .line-container > .line-wrapper")[0].getBoundingClientRect().left,
+                      linesWidth = $(".timeline > .timeline-item > .line-container > .line-wrapper").width(),
+                      linesPadding = 0;
+
                 var trackPosn = this.state.trackPosn + 0,
-                    trackedArray = Array(this.state.lines.length).fill(true); //,
-                    // scrollDelta = 0;
+                    x = -1;
+                    
+                if(e.type === 'touchmove') x = e.touches[0].clientX;
+                else x = e.clientX;
 
-                if(x - linesLeft - linesPadding >= 0) {
-                    trackPosn = totalLength/zoom*(x-linesLeft-linesPadding)/(linesWidth/zoom)+Math.max(earliestDate, scrollPosn);
-
-                    // if(trackPosn < scrollPosn + 10/zoom)
-                    //     scrollDelta += -1*totalLength/100;
-                    // else if(trackPosn > totalLength - 10/zoom)
-                    //     scrollDelta += totalLength/100;
-
-                    this.state.lines.forEach(function(line, i) {
-                        if(line.start > trackPosn || line.end < trackPosn)
-                            trackedArray[i] = false;
-                    });
-        
+                trackPosn = totalLength/zoom*(x-linesLeft-linesPadding)/(linesWidth/zoom)+Math.max(earliestDate, scrollPosn);
+                if(trackPosn >= earliestDate && trackPosn <= latestDate) {
                     this.setState({
                         trackPosn: trackPosn,
-                        trackedArray: trackedArray,
                         selectedEvent: { timeline: null, event: null },
-                        // scrollPosn: Math.min(latestDate - totalLength, Math.max(earliestDate, scrollPosn + scrollDelta)),
-                    }, function() { this.handleSelect(this.state.selectedEvent); });
+                        readyForTrack: false,
+                    }, function() {
+                        let thisObj = this;
+                        let setState = () => {thisObj.setState({ readyForTrack: true, })};
+                        setTimeout(setState, 0);                    
+                        this.handleSelect(this.state.selectedEvent);
+                    });
                 }
             }
         }
@@ -166,18 +171,11 @@ class Timeline extends React.Component {
 
         const timeline = $(e.target).closest(".timeline-item").attr("label"),
               event = $(e.target).attr("label"),
-              trackPosn = $(e.target).attr("posn"),
-              trackedArray = Array(this.state.lines.length).fill(true);
-
-        this.state.lines.forEach(function(line, i) {
-            if(line.start > trackPosn || line.end < trackPosn)
-                trackedArray[i] = false;
-        });
+              trackPosn = $(e.target).attr("posn");
 
         this.setState({
             selectedEvent: { timeline: timeline, event: event }, 
             trackPosn: trackPosn,
-            trackedArray: trackedArray,
         }, function() { this.handleSelect(this.state.selectedEvent); });
     }
 
@@ -185,7 +183,6 @@ class Timeline extends React.Component {
         this.setState({
             selectedEvent: { timeline: null, event: null, },
             trackPosn: -1,
-            trackedArray: Array(this.state.lines.length).fill(true),
         }, function() { this.handleSelect(this.state.selectedEvent); });
     }
 
@@ -232,6 +229,30 @@ class Timeline extends React.Component {
         }
     }
 
+    handleSave() {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state.lines)));
+        element.setAttribute('download', "timeline.json");
+        
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        
+        element.click();
+        
+        document.body.removeChild(element);
+    }
+
+    handleCopy() {
+        var element = document.createElement('input');
+        element.setAttribute("type", "text");
+        element.value = JSON.stringify(this.state.lines);
+        document.body.appendChild(element);
+        element.select();
+        element.setSelectionRange(0, 99999); /* For mobile devices */
+        document.execCommand("copy");
+        document.body.removeChild(element);
+    }
+
     render() {
         if(this.state.hasMounted) return this.fullRender();
         else return this.renderLoad();
@@ -249,11 +270,10 @@ class Timeline extends React.Component {
         const selectedEvent = this.state.selectedEvent,
               earliestDate = this.state.earliestDate + this.state.scrollPosn,
               totalLength = this.totalLength(),
-              allDates = this.state.allDates,
+              allDates = this.allDates(),
               disabledArray = this.state.disabledArray,
               trackCoord = this.trackerCoord(),
               trackPosn = this.state.trackPosn,
-              trackedArray = this.state.trackedArray,
               zoom = this.state.zoom,
               scrollPosn = this.state.scrollPosn,
 
@@ -263,34 +283,39 @@ class Timeline extends React.Component {
               handleZoomIn = this.handleZoomIn,
               handleZoomOut = this.handleZoomOut,
               handleScroll = this.handleScroll,
+              handleSave = this.handleSave,
+              handleCopy = this.handleCopy,
 
-              linesLeft = $("ul.timeline > li > .line-container").position() !== undefined ?
-                $("ul.timeline > li > .line-container").position().left : 0;
-                
-        allDates.sort((a, b) => a-b);
+              linesLeft = $("ul.timeline > .timeline-item > .line-container").position() !== undefined ?
+                $("ul.timeline > .timeline-item > .line-container").position().left : 0;
 
         return (
             <div className="timeline-container" onWheel={handleScroll}
                  onMouseDown={(e) => this.setState({ mouseDown: e.target, })}
                  onMouseUp={(e) => {this.setState({ mouseDown: null, })}}>
-                <ul className="timeline" onMouseDown={handleTrack} onMouseMove={handleTrack}
-                    dragging={this.state.mouseDown !== null ? "dragging" : undefined}>
+                <ul className="timeline" dragging={this.state.mouseDown !== null ? "dragging" : undefined}
+                    foggedleft={zoom > 1 && scrollPosn > 0 ? "foggedleft" : undefined}
+                    foggedright={zoom > 1 && scrollPosn < totalLength ? "foggedleft" : undefined}
+                    onMouseDown={handleTrack} onMouseMove={handleTrack} onTouchMove={handleTrack}>
                     {
                         trackPosn >= scrollPosn &&
                             <div className="timeline-tracker" posn={trackPosn}
-                                 style={{ "left": trackCoord + "px" }} />
+                                 style={{ "left": trackCoord + "px" }}
+                            />
                     }
                     <li className="timeline-item ruler-container">
                         <div />
                         <div />
                         <div className="ruler">
-                            {
-                                allDates.map((posn, i) =>
-                                    <div className="rule" posn={posn} key={i}
-                                         posnvisible={posn >= scrollPosn ? "posnvisible" : undefined}
-                                         style={{ "left": 100*(posn - earliestDate)/totalLength + "%" }} />
-                                )
-                            }
+                            <div className="ruler-wrapper">
+                                {
+                                    allDates.map((posn, i) =>
+                                        <div className="rule" posn={posn} key={i}
+                                                posnvisible={posn >= scrollPosn ? "posnvisible" : undefined}
+                                                style={{ "left": 100*(posn - earliestDate)/totalLength + "%" }} />
+                                    )
+                                }
+                            </div>
                         </div>
                     </li>
                     {
@@ -302,23 +327,25 @@ class Timeline extends React.Component {
                                        label={line.label} style={{ "backgroundColor": line.color }}
                                        checked={disabledArray[i] ? undefined : "checked"}
                                        onChange={handleToggleLine}/>
-                                <div className="line-container" tracked={trackedArray[i] ? "tracked" : undefined}>
-                                    <div className="line"
+                                <div className="line-container" tracked={!(line.start>trackPosn || line.end<trackPosn) || trackPosn===-1 ? "tracked" : undefined}>
+                                    <div className="line-wrapper"
                                          startvisible={line.start >= scrollPosn ? "startvisible" : undefined}
-                                         endvisible={line.end >= scrollPosn ? "endvisible" : undefined}
-                                         style={{ "backgroundColor": line.color,
-                                                  "left": Math.max(0, 100*(line.start - earliestDate)/totalLength) + "%",
-                                                  "width": Math.max(0, 100*(line.end-Math.max(line.start, scrollPosn))/totalLength) + "%" }} />
-                                    {
-                                        line.events.map((event, j) =>
-                                            <div className="line-event" posn={event.posn} label={event.label} key={j}
-                                                 posnvisible={event.posn >= scrollPosn ? "posnvisible" : undefined}
-                                                 isselected={(line.label===selectedEvent.timeline && event.label===selectedEvent.event) ?
-                                                              "isselected" : undefined}
-                                                 style={{ "left": 100*(event.posn - earliestDate)/totalLength + "%",
-                                                          "backgroundColor": line.color, }} />
-                                        )
-                                    }
+                                         endvisible={line.end <= totalLength*zoom ? "endvisible" : undefined}>
+                                        <div className="line"
+                                             style={{ "backgroundColor": line.color,
+                                                      "left": Math.max(0, 100*(line.start - earliestDate)/totalLength) + "%",
+                                                      "width": Math.max(0, 100*(line.end-Math.max(line.start, scrollPosn))/totalLength) + "%" }} />
+                                        {
+                                            line.events.map((event, j) =>
+                                                <div className="line-event" posn={event.posn} label={event.label} key={j}
+                                                    posnvisible={event.posn >= scrollPosn ? "posnvisible" : undefined}
+                                                    isselected={(line.label===selectedEvent.timeline && event.label===selectedEvent.event) ?
+                                                                "isselected" : undefined}
+                                                    style={{ "left": 100*(event.posn - earliestDate)/totalLength + "%",
+                                                             "backgroundColor": line.color, }} />
+                                            )
+                                        }
+                                    </div>
                                 </div>
                             </li>
                         )
@@ -332,11 +359,15 @@ class Timeline extends React.Component {
                                         "marginLeft": linesLeft, }} />
                     </div>
                     <div className="timeline-controls">
-                        <button className="save-button">
+                        <button className="save-button" onClick={handleSave}>
                             <FontAwesomeIcon icon={faSave} />
                             <span>Save file</span>
                         </button>
-                        <span>
+                        {/* <button className="copy-button" onClick={handleCopy}>
+                            <FontAwesomeIcon icon={faCopy} />
+                            <span>Copy JSON</span>
+                        </button> */}
+                        <span title="Use buttons or Alt+Scroll to zoom timelines">
                             <button className="zoom-in" onMouseDown={handleZoomIn}>+</button>
                             <span zoom={Math.round(this.state.zoom*100)}>
                                 <FontAwesomeIcon icon={faSearch} />
@@ -344,6 +375,7 @@ class Timeline extends React.Component {
                             </span>
                             <button className="zoom-out" onMouseDown={handleZoomOut}>&minus;</button>
                         </span>
+                        {/* <div /> */}
                         {
                             trackPosn >= 0 && (
                                 <button className="clear-button" onClick={handleClearSelected}>
