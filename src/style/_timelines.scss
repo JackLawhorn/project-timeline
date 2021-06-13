@@ -1,0 +1,245 @@
+// The timeline itself
+.timeline-container > .timeline-container-body > .timeline {
+    display: table;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0;
+    padding: 0 0 0.5em;
+    
+    list-style: none;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-user-drag: none;
+    cursor: pointer;
+
+    // Change cursor on drag
+    &[dragging] {
+        cursor: col-resize;
+    }
+    
+    // A single layer on the timeline
+    & > .timeline-item {
+        display: table-row;
+
+        &:not(.ruler-container):is(:hover, :focus-within) {
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.0625), transparent);
+            z-index: 1000;
+        }
+
+        & > * {
+            display: table-cell;
+        }
+
+        // The timeline layer's label
+        & > .line-label {
+            font-weight: bold;
+            text-align: left;
+            max-width: 10vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            cursor: pointer;
+            
+            & > * {
+                padding: 0.75em;
+                
+                font-size: inherit;
+                background: transparent;
+                border: none;
+                border-bottom: 0.125em solid transparent;
+                
+                outline: none;
+                cursor: pointer;
+            }
+            
+            & > .line-toggle {
+                &:is(:hover, :focus):not(:active) > svg {
+                    transform: scale(1.25);
+                }
+                
+                & > svg {
+                    width: 2ch;
+                    @include transition-all;
+                }
+            }
+
+            & > .line-name {
+                margin-left: -2ch;
+                font-weight: bold;
+                transition: opacity 0.2s ease;
+                
+                &:is(:hover, :focus):not(:active) {
+                    text-decoration: underline;
+                    text-decoration-thickness: 0.1875em;
+                }
+            }
+        }
+
+        // The main part of the layer where the timeline is drawn
+        & > .line-container {
+            width: 99%;
+            padding: 0 2em 0 1em;
+        }
+    }
+        
+    // The first row which displays the rules
+    & > .ruler-container {
+        position: sticky;
+
+        & > .ruler {
+            padding: 0.5em 2em 0.5em 1em;
+
+            & > .ruler-wrapper {
+                height: 1.5em;
+                
+                & > .rule::before {
+                    content: attr(posn);
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    transform: translateX(-50%);
+                }
+            }
+        }
+    }
+
+    // Used to add padding inside the table
+    .line-wrapper {
+        width: calc(100% - 3em);
+        height: 100%;
+        position: absolute;
+        
+        // The SVG components that make up the drawn timeline
+        & > svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            @include transition-all;
+
+            line {
+                stroke-width: 0.5em;
+
+                &.line-end {
+                    stroke-linecap: round;
+                }
+            }
+
+            circle.line-event {
+                r: 0.5em;
+                stroke-width: 0.25em;
+                fill: var(--primary-background);
+                filter: drop-shadow(0 0 0.25em rgba(0, 0, 0, 0.5));
+                outline: none;
+                
+                cursor: pointer;
+                transition: r 0.2s ease;
+
+                &:is(:hover, :focus):not(:active) {
+                    r: 0.75em;
+
+                    & ~ * {
+                        visibility: visible;
+                    }
+                }
+
+                // Tooltip workaround
+                & ~ * {
+                    visibility: hidden;
+                    pointer-events: none;
+
+                    &:is(line) {
+                        stroke: white;
+                        stroke-width: 0.375em;
+                        stroke-linecap: round;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// The timeline's tracker indicator
+.timeline-container > .timeline-container-body > .timeline-tracker {
+    width: 0.125em;
+    height: calc(100% - 3em);
+    position: absolute;
+    top: 0;
+
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(50%);
+
+    pointer-events: none;
+}
+
+// The timeline's bottom control-bar
+.timeline-container > .timeline-container-body > .timeline-bottom {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    background: inherit;
+
+    & > .timeline-scrollbar {
+        height: 0.5em;
+
+        & > .scrollbar-thumb {
+            height: 100%;
+            border-radius: 50em;
+            background: rgba(255, 255, 255, 0.15);
+            transition: opacity 0.2s ease;
+        }
+    }
+
+    & > .timeline-controls {
+        display: flex;
+        height: 3em;
+        user-select: none;
+        -webkit-user-drag: none;
+        box-shadow: 0 0 2em rgba(255, 255, 255, 0.075);
+
+        & * {
+            @include has-left-icon;
+            flex: 1;
+        }
+    
+        button {
+            padding: 0;
+
+            font-size: inherit;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+
+            &:not(.clear-button):is(:active, :not(:hover):not(:focus)) {
+                opacity: 0.5;
+            }
+
+            &.clear-button {
+                background: linear-gradient(to top left, crimson, transparent, transparent);
+
+                &:is(:active, :not(:hover):not(:focus)) {
+                    color: rgba(255, 255, 255, 0.5);
+                }
+            }
+        }
+
+        & > .zoom-info {
+            display: flex;
+            align-items: center;
+            cursor: ew-resize;
+        }
+    }
+}
+
+// Complex stylings for "popping" timelines
+.timeline-item:is([disabled], :not([tracked])) {
+    .line-toggle:not(:hover):not(:focus) > svg,
+    .line-name:not(:hover):not(:focus) > span,
+    .line-wrapper > svg {
+        opacity: 0.25;
+        
+        & > line {
+            stroke-width: 0.375em !important;
+        }
+    }
+}

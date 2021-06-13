@@ -4,9 +4,7 @@ import React from 'react';
 import './App.css';
 import './style/style.css';
 
-import lines from './data/test-lines.json'
-
-import SplashScreen from './components/SplashScreen';
+import source from './data/test-lines.json'
 import Timeline from './components/Timeline';
 
 class App extends React.Component {
@@ -14,13 +12,9 @@ class App extends React.Component {
         super(props);
 
         this.state = {
-            lines: lines,
-            selectedEvent: { timeline: null, event: null, },
-        }
+            source: source,
+        };
         this.handleLoadFile = this.handleLoadFile.bind(this);
-        this.handleSelect = this.handleSelect.bind(this);
-        this.fullRender = this.fullRender.bind(this);
-        this.renderLoad = this.renderLoad.bind(this);
     }
 
     componentDidMount() {
@@ -33,45 +27,18 @@ class App extends React.Component {
         });
     }
 
-    handleSelect(newSelected) {
-        this.setState({
-            selectedEvent: newSelected,
-        });
-    }
-
     render() {
-        if(this.state.lines !== null) return this.fullRender();
-        else return this.renderLoad();
-    }
+        const lines = this.state.lines;
 
-    fullRender() {
-        const lines = this.state.lines,
-              selectedEvent = this.state.selectedEvent;
-        var selectedDisplayText = "";
-        if(lines !== undefined && selectedEvent.event !== null)
-            lines.forEach(function(line, i) {
-                line.events.forEach(function(event, j) {
-                    if(line.label===selectedEvent.timeline &&
-                        event.label===selectedEvent.event)
-                        selectedDisplayText = JSON.stringify(line);
-                });
-            });
-
-        return(
-            <div className="App">
-                <Timeline lines={lines} selectedEvent={this.state.selectedEvent} handleSelect={this.handleSelect} />
-                <div className="blur" />
-                <div className="displaySelected">{selectedDisplayText}</div>
-            </div>
-        )
-    }
-
-    renderLoad() {
-        return(
-            <div className="App">
-                <SplashScreen handleLoadFile={this.handleLoadFile} />
-            </div>
-        )
+        if(lines !== null)
+            return (
+                <div className="App">
+                    <Timeline source={source} />
+                </div>
+            );
+        else return(
+            <div className="App" />
+        );
     }
 }
 

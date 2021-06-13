@@ -1,462 +1,108 @@
-////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                        //
-//                                     Style generics                                     //
-//                                                                                        //
-////////////////////////////////////////////////////////////////////////////////////////////
+@import 'mixins';
+@import 'timelines';
+@import 'overlays';
+
+:root {
+    --primary-background: hsl(283, 47%, 7%);
+    --primary-background-transparent: hsla(282, 49%, 7%, 0.5);
+}
 
 body {
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
 
-    font-family: sans-serif;
+    .App {
+        max-width: 960px;
+        padding: 1.5em 0;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+}
+
+.timeline-container {
+    max-width: 100%;
+    background: var(--primary-background);
+    border-radius: 0.375em;
+
     color: white;
-    background: #170A1C;
-    
-    * {
+    outline: none;
+    overflow: hidden;
+
+    &, *, *::before, *::after {
         position: relative;
         box-sizing: border-box;
 
         backface-visibility: hidden;
         transform: translate3d(0,0,0) 
     }
-
-    .App {
-        max-width: 960px;
-        margin: 0 auto;
-        overflow: hidden;
+    * {
+        color: inherit;
     }
-}
 
-////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                        //
-//                                     Startup screen                                     //
-//                                                                                        //
-////////////////////////////////////////////////////////////////////////////////////////////
+    &[fullscreen] {
+        position: fixed;
+        inset: 0;
+        border-radius: unset;
+    }
 
-.splash-screen {
-    display: flex;
-    justify-content: space-between;
-    height: 100%;
-    padding: 1.5rem;
+    ::-webkit-scrollbar {
+        width: 1.5em;
+        height: 1.5em;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.25);
+        border-radius: 50em;
+        border: 0.5em solid rgba(0, 0, 0, 0);
+        background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-track{
+        background: transparent;
+    }
 
-    color: white;
+    & > .timeline-container-body {
+        padding-bottom: 3.5em;
+        height: calc(100% - 3.25em);
+    }
 
-    & > * {
-        display: inline-block;
-        vertical-align: top;
-        width: calc(50% - 0.75rem);
-        padding: 1.5rem;
+    & > .timeline-container-header {
+        display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
 
-        text-align: center;
-        border: 1px solid white;
-        border-radius: 4px;
-
-        & > h1 {
-            margin: 0px;
-            padding: 0px;
-            font-weight: normal;
+        & > * {
+            padding: 1em;
         }
 
-        & > button {
-            width: 100%;
-            margin-top: 1.5rem;
-            padding: 8px 10px;
-            text-align: center;
+        & > .project-title {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            flex-grow: 1;
+        }
 
-            font-size: 1rem;
-            color: white;
+        & > .menu-button,
+        & > .expand-collapse-button {
+            font-size: inherit;
             background: transparent;
-            border: 1px solid white;
+            border: none;
             cursor: pointer;
-        }
-    }
+            outline: none;
 
-    & > .load-file-prompt > input {
-        display: none;
-    }
-}
 
-////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                        //
-//                                          Main                                          //
-//                                                                                        //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-.timeline-container {
-    width: 960px;
-    max-height: 40%;
-
-    cursor: pointer;
-
-    & + div.blur {
-        width: 100%;
-        height: 8px;
-
-        // background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15), transparent);
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 50%;
-        filter: blur(2px);
-    }
-    
-    & > .timeline {
-        display: table;
-        width: calc(100% + 0px);
-        padding: 15px 0px 19px;
-        margin: 0px;
-        
-        list-style: none;
-        user-select: none;
-        -webkit-user-drag: none;
-
-        &[dragging] {
-            cursor: col-resize !important;
-        }
-
-        &[foggedleft] .line-wrapper:not([startvisible])::after,
-        &[foggedright]::after {
-            content: '';
-            width: 8px;
-            height: 100%;
-            position: absolute;
-            top: 0px;
-
-            z-index: 1000;
-        }
-        &[foggedleft] .line-wrapper:not([startvisible])::before {
-            background: linear-gradient(to right, #170A1C, #170A1C,  transparent);
-            left: -4px;
-        }
-        &[foggedright]::after {
-            right: 0px;
-            background: linear-gradient(to left,  #170A1C, transparent);
-        }
-        
-        & > .timeline-tracker {
-            display: block;
-            width: 2px;
-            height: 100%;
-            position: absolute;
-            top: 0px;
-
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(1px);
-
-            pointer-events: none;
-        }
-        
-        & > .timeline-item {
-            display: table-row;
-
-            & > * {
-                display: table-cell;
-                white-space: nowrap;
-
-            }
-            
-            &.ruler-container > .ruler {
-                padding: 0px 12px;
-
-                & > .ruler-wrapper {
-                    width: 100%;
-                    height: 100%;
-                    padding: 0px 0px 2rem;
-                    position: relative;
-                    
-                    & > .rule::before {
-                        content: attr(posn);
-                        display: block;
-                        position: absolute;
-                        top: 0px;
-                    
-                        color: white;
-                        transform: translateX(-50%);
-                    }
-                    & > .rule:first-of-type::before {
-                        transform: unset;
-                    }
-                    & > .rule:last-of-type::before {
-                        transform: translateX(-100%);
-                    }
-                }
-            }
-
-            & > .line-label {
-                font-weight: bold;
-                text-align: left;
-                max-width: 10vw;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            & > .line-toggle {
-                margin: 14px 30px 14px 15px;
-                cursor: pointer;
-                transition: 0.2s ease;
-                
-                &:after {
-                    content: '';
-                    display: flex;
-                    justify-content: center;
-                    align-content: center;
-                    width: 16px;
-                    height: 16px;
-                    position: absolute;
-                    top: -2px;
-                    left: -2px;
-                
-                    color: white;
-                    line-height: 1em;
-                    background-color: white;
-                    border-radius: 4px;
-                }
-                &:checked::after {
-                    content: '\25A0';
-                    background-color: inherit;
-                }
-
-                &:checked,
-                &:checked ~ .line-container[tracked] > .line-event,
-                &:checked ~ .line-container[tracked] > .line-wrapper[startvisible] > .line::before,
-                &:checked ~ .line-container[tracked] > .line-wrapper[endvisible] > .line::after {
-                    transform: scale(1.25);
-                }
-                &:checked ~ .line-container[tracked] .line > .line-label {
-                    transform: scale(1.1);
-                }
-            }
-
-            & > .line-container {
-                width: 99%;
-                padding: 0px 12px;
-
-                & > .line-wrapper {
-                    width: calc(100% - 24px);
-                    height: 100%;
-                    position: absolute;
-
-                    &[startvisible] > .line::before,
-                    &[endvisible] > .line::after {
-                        content: '';
-                        display: block;
-                        position: absolute;
-                        height: 20px;
-                        width: 8px;
-                        top: -6px;
-                        
-                        background: inherit;
-                        border-radius: 50px;
-                        transition: 0.2s ease;
-                    }
-                    &[startvisible] > .line::before {
-                        left: -4px;
-                    }
-                    &[endvisible] > .line::after {
-                        right: -4px;
-                    }
-
-                    & > .line {
-                        position: absolute;
-                        top: calc(50% - 4px);
-                        height: 8px;
-                    
-                        color: white;
-                        text-align: center;
-                        text-shadow: 0px 0px 2px black;
-
-                        z-index: 0 !important;
-                    }
-
-                    & > .line-event {
-                        padding: 6px;
-                        margin-left: -8px;
-                        position: absolute;
-                        top: 12.5px;
-                    
-                        text-shadow: none;
-                        background-color: inherit;
-                        border: 2px solid white;
-                        box-sizing: border-box;
-                        cursor: pointer !important;
-                    
-                        z-index: 0 !important;
-
-                        &:hover:not(:active), &:focus:not(:active), &[isSelected]:not(:active) {
-                            &::before, &::after {
-                                content: '';
-                                display: block;
-                                position: absolute;
-                            
-                                transform: translateX(-50%);
-                                
-                                z-index: 1000 !important;
-                            }
-                            &::before {
-                                width: 0px; 
-                                height: 0px;
-                                top: calc(100% + 0.5px);
-                            
-                                border-left: 6px solid transparent;
-                                border-right: 6px solid transparent;
-                                border-bottom: 6px solid white;
-                            }
-                            &::after {
-                                content: attr(label) ' (' attr(posn) ')';
-                                width: max-content;
-                                padding: 2px 4px;
-                                top: calc(100% + 5.5px);
-                            
-                                color: #170A1C;
-                                font-size: 0.66rem;
-                                background-color: white;
-                                border-radius: 4px;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    & > .timeline-bottom {
-        width: 100%;
-
-        & > .timeline-scrollbar {
-            height: 4px;
-
-            & > .scrollbar-thumb {
-                height: 100%;
-
-                background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
-                filter: blur(2px);
-            }
-        }
-
-        & > .timeline-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            width: 100%;
-            height: 3rem;
-        
-            user-select: none;
-            -webkit-user-drag: none;
-
-            & svg + * {
-                margin-left: 5px !important;
-            }
-
-            & > * {
-                flex: 1;
-            }
-        
-            button {
-                margin: 0px;
-                padding: 0px;
-
-                font-size: 1rem;
-                color: white;
-                background: transparent;
-                border: none;
-                outline: none;
-                cursor: pointer;
-
+            &:not(:hover):not(:focus) {
                 opacity: 0.5;
-                
-                &:hover:not(:active), &:focus:not(:active) {
-                    opacity: 1;
+            }
+            &:is(:hover, :focus) {
+                &.menu-button {
+                    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.25), transparent, transparent);
                 }
-
-                &.clear-button {
-                    border-color: rgba(255, 0, 0, 0.5);
-                    color: red;
-
-                    &:hover:not(:active), &:focus:not(:active) {
-                        border-color: rgba(255, 0, 0, 1) !important;
-                    }
+                &.expand-collapse-button {
+                    background: linear-gradient(to bottom left, rgba(255, 255, 255, 0.25), transparent, transparent);
                 }
             }
 
-            & > span {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                font-size: 1rem;
-                font-size: monospace;
-                color: white;
-
-                & > * + * {
-                    margin-left: 10px;
-                }
-                
-                button {
-                    padding: 2px 6px;
-                    border: 1px solid white;
-                    border-radius: 4px;
-                }
-
-                span::after {
-                    // content: attr(zoom);
-                }
-            }
+            @include has-left-icon;
         }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                        //
-//                                   Complex overrides                                    //
-//                                                                                        //
-////////////////////////////////////////////////////////////////////////////////////////////
-
-.timeline > .timeline-item {
-    // Account for line-events on last line
-    &:last-of-type > .line-container > .line-wrapper > .line-event:hover:not(:active),
-    &:last-of-type > .line-container > .line-wrapper > .line-event:focus:not(:active),
-    &:last-of-type > .line-container > .line-wrapper > .line-event[isselected]:not(:active) {
-        &::before {
-            top: unset !important;
-            bottom: calc(100% + 0.5px);
-        
-            border-bottom: none !important;
-            border-top: 6px solid white;
-        }
-        &::after {
-            top: unset !important;
-            bottom: calc(100% + 5.5px);
-        }
-    }
-
-    // Toggled/tracked lines
-    & > .line-container:not([tracked]) > .line-wrapper> .line,
-    & > .line-container:not([tracked]) > .line-wrapper> .line-event:not([isselected]):not(:hover),
-    & > .line-toggle:not(:checked) + .line-container > .line-wrapper> .line,
-    & > .line-toggle:not(:checked) + .line-container > .line-wrapper> .line-event:not([isselected]):not(:hover) {
-        opacity: 0.25;
-    }
-    & > .line-container:not([tracked]) > .line-wrapper> .line-event:not([isselected]):not(:hover),
-    & > .line-toggle:not(:checked) + .line-container > .line-wrapper> .line-event:not([isselected]):not(:hover) {
-        background: transparent !important;
-    }
-
-    // UI pop-in when active
-    & > .line-container > .line-wrapper> .line-event:hover:not(:active),
-    & > .line-container > .line-wrapper> .line-event:active:not(:active),
-    & > .line-container > .line-wrapper> .line-event[isselected]:not(:active),
-    & > .line-toggle:hover:not(:active) {
-        transform: scale(1.5) !important;
-    }
-
-    & > .line-container:not([tracked]) {
-        height: 0px !important;
-        transition: 0.2s ease;
-    }
-}
-
-// Handle scroll visibility
-.timeline-container > .timeline > .timeline-item {
-    & > .ruler > .ruler-wrapper > .rule:not([posnvisible]),
-    & > .line-container > .line-wrapper> .line-event:not([posnvisible]) {
-        display: none;
     }
 }

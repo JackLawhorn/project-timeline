@@ -1,0 +1,10 @@
+@mixin transition-all {
+    transition: 0.2s ease;
+}
+
+@mixin has-left-icon {
+    & > svg:first-child {
+        width: 2ch;
+        margin-right: 1ch;
+    }
+}

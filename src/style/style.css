@@ -1,12 +1,613 @@
-body {
-  margin: 0px;
-  padding: 0px;
-  font-family: sans-serif;
-  color: white;
-  background: #170A1C;
+.timeline-container > .timeline-container-body > .timeline {
+  display: table;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0;
+  padding: 0 0 0.5em;
+  list-style: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-user-drag: none;
+  cursor: pointer;
 }
 
-body * {
+.timeline-container > .timeline-container-body > .timeline[dragging] {
+  cursor: col-resize;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item {
+  display: table-row;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item:not(.ruler-container):is(:hover, :focus-within) {
+  background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(255, 255, 255, 0.0625)), to(transparent));
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.0625), transparent);
+  z-index: 1000;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > * {
+  display: table-cell;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label {
+  font-weight: bold;
+  text-align: left;
+  max-width: 10vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > * {
+  padding: 0.75em;
+  font-size: inherit;
+  background: transparent;
+  border: none;
+  border-bottom: 0.125em solid transparent;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-toggle:is(:hover, :focus):not(:active) > svg {
+  -webkit-transform: scale(1.25);
+          transform: scale(1.25);
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-toggle > svg {
+  width: 2ch;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-name {
+  margin-left: -2ch;
+  font-weight: bold;
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-name:is(:hover, :focus):not(:active) {
+  text-decoration: underline;
+  text-decoration-thickness: 0.1875em;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-container {
+  width: 99%;
+  padding: 0 2em 0 1em;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .ruler-container {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .ruler-container > .ruler {
+  padding: 0.5em 2em 0.5em 1em;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .ruler-container > .ruler > .ruler-wrapper {
+  height: 1.5em;
+}
+
+.timeline-container > .timeline-container-body > .timeline > .ruler-container > .ruler > .ruler-wrapper > .rule::before {
+  content: attr(posn);
+  display: block;
+  position: absolute;
+  top: 0;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper {
+  width: calc(100% - 3em);
+  height: 100%;
+  position: absolute;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg line {
+  stroke-width: 0.5em;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg line.line-end {
+  stroke-linecap: round;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg circle.line-event {
+  r: 0.5em;
+  stroke-width: 0.25em;
+  fill: var(--primary-background);
+  -webkit-filter: drop-shadow(0 0 0.25em rgba(0, 0, 0, 0.5));
+          filter: drop-shadow(0 0 0.25em rgba(0, 0, 0, 0.5));
+  outline: none;
+  cursor: pointer;
+  -webkit-transition: r 0.2s ease;
+  transition: r 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg circle.line-event:is(:hover, :focus):not(:active) {
+  r: 0.75em;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg circle.line-event:is(:hover, :focus):not(:active) ~ * {
+  visibility: visible;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg circle.line-event ~ * {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.timeline-container > .timeline-container-body > .timeline .line-wrapper > svg circle.line-event ~ *:is(line) {
+  stroke: white;
+  stroke-width: 0.375em;
+  stroke-linecap: round;
+}
+
+.timeline-container > .timeline-container-body > .timeline-tracker {
+  width: 0.125em;
+  height: calc(100% - 3em);
+  position: absolute;
+  top: 0;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-transform: translateX(50%);
+          transform: translateX(50%);
+  pointer-events: none;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background: inherit;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-scrollbar {
+  height: 0.5em;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-scrollbar > .scrollbar-thumb {
+  height: 100%;
+  border-radius: 50em;
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  height: 3em;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-user-drag: none;
+  -webkit-box-shadow: 0 0 2em rgba(255, 255, 255, 0.075);
+          box-shadow: 0 0 2em rgba(255, 255, 255, 0.075);
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls * {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls * > svg:first-child {
+  width: 2ch;
+  margin-right: 1ch;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls button {
+  padding: 0;
+  font-size: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls button:not(.clear-button):is(:active, :not(:hover):not(:focus)) {
+  opacity: 0.5;
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls button.clear-button {
+  background: -webkit-gradient(linear, right bottom, left top, from(crimson), color-stop(transparent), to(transparent));
+  background: linear-gradient(to top left, crimson, transparent, transparent);
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls button.clear-button:is(:active, :not(:hover):not(:focus)) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.timeline-container > .timeline-container-body > .timeline-bottom > .timeline-controls > .zoom-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  cursor: ew-resize;
+}
+
+.timeline-item:is([disabled], :not([tracked])) .line-toggle:not(:hover):not(:focus) > svg,
+.timeline-item:is([disabled], :not([tracked])) .line-name:not(:hover):not(:focus) > span,
+.timeline-item:is([disabled], :not([tracked])) .line-wrapper > svg {
+  opacity: 0.25;
+}
+
+.timeline-item:is([disabled], :not([tracked])) .line-toggle:not(:hover):not(:focus) > svg > line,
+.timeline-item:is([disabled], :not([tracked])) .line-name:not(:hover):not(:focus) > span > line,
+.timeline-item:is([disabled], :not([tracked])) .line-wrapper > svg > line {
+  stroke-width: 0.375em !important;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-background-transparent);
+  -webkit-backdrop-filter: blur(0.375em);
+          backdrop-filter: blur(0.375em);
+  opacity: 0;
+  pointer-events: none;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer[expanded] {
+  opacity: 1;
+  pointer-events: unset;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > * {
+  max-height: 100%;
+  overflow-y: scroll;
+  margin: 0;
+  padding: 0;
+  -webkit-box-flex: 99;
+      -ms-flex-positive: 99;
+          flex-grow: 99;
+  text-align: left;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  list-style: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay > li {
+  padding: 1.25em 1.5em;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  outline: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay > li > svg {
+  width: 2ch;
+  margin: 0 1ch 0 0;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay > li:is(:hover, :focus):not(:active) {
+  background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0.125)), to(transparent));
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li {
+  text-align: center;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li:hover {
+  background: rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li > svg {
+  margin: 0;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li > span {
+  display: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs {
+  margin: 0;
+  font-weight: normal;
+  outline: none;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > * {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > * + * {
+  margin-left: 1ch;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > svg {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select {
+  padding: 1.25rem 1.5rem;
+  color: inherit;
+  font-size: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select:focus,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select:focus,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select:focus {
+  background-color: rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select > option,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select > option,
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select > option {
+  color: black;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
+  padding: 0 1em 1em 0;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay hr {
+  opacity: 0.5;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view-label {
+  margin-bottom: 1em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view {
+  display: table;
+  padding: 0;
+  margin: 0;
+  border: 0.125em solid white;
+  border-collapse: collapse;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item {
+  display: table-row;
+  cursor: pointer;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header {
+  color: var(--primary-background);
+  font-weight: bold;
+  background: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header > *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header > *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header > * {
+  padding: 0.25em 1.5em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header > * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header > * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header > * + * {
+  border-left: 0.125em solid var(--primary-background);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover {
+  background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0.125)), to(transparent));
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-label, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-label,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-label,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-label,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-label,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-label {
+  text-decoration: underline;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-control .item-navigate-button, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-control .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-control .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-control .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-control .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-control .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-control .item-navigate-button {
+  border-color: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control {
+  padding: 0.5em 0.75em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button {
+  padding: 0.5em 0.75em;
+  border-radius: 50em;
+  font-size: 1em;
+  background: transparent;
+  border: 0.125em solid transparent;
+  opacity: 0.5;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button:focus, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button:focus,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button:focus {
+  opacity: 1;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button * + *, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button * + *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button * + * {
+  margin-left: 1ch;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button svg, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button svg,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button svg {
+  width: 2ch;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header > *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item > *,
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item > * {
+  display: table-cell;
+  width: calc(99%);
+  padding: 1em 1.5em;
+  white-space: nowrap;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header > *:not(.item-label),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item > *:not(.item-label),
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item > *:not(.item-label) {
+  text-align: center;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .notes-section {
+  margin: 1em 0 3em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .notes-section .selected-label {
+  font-size: 1.7em;
+  font-weight: bold;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer .notes-section .selected-notes {
+  margin-top: 1em;
+}
+
+:root {
+  --primary-background: hsl(283, 47%, 7%);
+  --primary-background-transparent: hsla(282, 49%, 7%, 0.5);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body .App {
+  max-width: 960px;
+  padding: 1.5em 0;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.timeline-container {
+  max-width: 100%;
+  background: var(--primary-background);
+  border-radius: 0.375em;
+  color: white;
+  outline: none;
+  overflow: hidden;
+}
+
+.timeline-container, .timeline-container *, .timeline-container *::before, .timeline-container *::after {
   position: relative;
   -webkit-box-sizing: border-box;
           box-sizing: border-box;
@@ -16,442 +617,89 @@ body * {
           transform: translate3d(0, 0, 0);
 }
 
-body .App {
-  max-width: 960px;
-  margin: 0 auto;
-  overflow: hidden;
+.timeline-container * {
+  color: inherit;
 }
 
-.splash-screen {
+.timeline-container[fullscreen] {
+  position: fixed;
+  inset: 0;
+  border-radius: unset;
+}
+
+.timeline-container ::-webkit-scrollbar {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.timeline-container ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 50em;
+  border: 0.5em solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+}
+
+.timeline-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-container > .timeline-container-body {
+  padding-bottom: 3.5em;
+  height: calc(100% - 3.25em);
+}
+
+.timeline-container > .timeline-container-header {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  height: 100%;
-  padding: 1.5rem;
-  color: white;
-}
-
-.splash-screen > * {
-  display: inline-block;
-  vertical-align: top;
-  width: calc(50% - 0.75rem);
-  padding: 1.5rem;
-  text-align: center;
-  border: 1px solid white;
-  border-radius: 4px;
-}
-
-.splash-screen > * > h1 {
-  margin: 0px;
-  padding: 0px;
-  font-weight: normal;
-}
-
-.splash-screen > * > button {
-  width: 100%;
-  margin-top: 1.5rem;
-  padding: 8px 10px;
-  text-align: center;
-  font-size: 1rem;
-  color: white;
-  background: transparent;
-  border: 1px solid white;
-  cursor: pointer;
-}
-
-.splash-screen > .load-file-prompt > input {
-  display: none;
-}
-
-.timeline-container {
-  width: 960px;
-  max-height: 40%;
-  cursor: pointer;
-}
-
-.timeline-container + div.blur {
-  width: 100%;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 50%;
-  -webkit-filter: blur(2px);
-          filter: blur(2px);
-}
-
-.timeline-container > .timeline {
-  display: table;
-  width: calc(100% + 0px);
-  padding: 15px 0px 19px;
-  margin: 0px;
-  list-style: none;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-  -webkit-user-drag: none;
-}
-
-.timeline-container > .timeline[dragging] {
-  cursor: col-resize !important;
-}
-
-.timeline-container > .timeline[foggedleft] .line-wrapper:not([startvisible])::after, .timeline-container > .timeline[foggedright]::after {
-  content: '';
-  width: 8px;
-  height: 100%;
-  position: absolute;
-  top: 0px;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
   z-index: 1000;
 }
 
-.timeline-container > .timeline[foggedleft] .line-wrapper:not([startvisible])::before {
-  background: -webkit-gradient(linear, left top, right top, from(#170A1C), color-stop(#170A1C), to(transparent));
-  background: linear-gradient(to right, #170A1C, #170A1C, transparent);
-  left: -4px;
+.timeline-container > .timeline-container-header > * {
+  padding: 1em;
 }
 
-.timeline-container > .timeline[foggedright]::after {
-  right: 0px;
-  background: -webkit-gradient(linear, right top, left top, from(#170A1C), to(transparent));
-  background: linear-gradient(to left, #170A1C, transparent);
-}
-
-.timeline-container > .timeline > .timeline-tracker {
-  display: block;
-  width: 2px;
-  height: 100%;
-  position: absolute;
-  top: 0px;
-  background: rgba(255, 255, 255, 0.15);
-  -webkit-transform: translateX(1px);
-          transform: translateX(1px);
-  pointer-events: none;
-}
-
-.timeline-container > .timeline > .timeline-item {
-  display: table-row;
-}
-
-.timeline-container > .timeline > .timeline-item > * {
-  display: table-cell;
+.timeline-container > .timeline-container-header > .project-title {
   white-space: nowrap;
-}
-
-.timeline-container > .timeline > .timeline-item.ruler-container > .ruler {
-  padding: 0px 12px;
-}
-
-.timeline-container > .timeline > .timeline-item.ruler-container > .ruler > .ruler-wrapper {
-  width: 100%;
-  height: 100%;
-  padding: 0px 0px 2rem;
-  position: relative;
-}
-
-.timeline-container > .timeline > .timeline-item.ruler-container > .ruler > .ruler-wrapper > .rule::before {
-  content: attr(posn);
-  display: block;
-  position: absolute;
-  top: 0px;
-  color: white;
-  -webkit-transform: translateX(-50%);
-          transform: translateX(-50%);
-}
-
-.timeline-container > .timeline > .timeline-item.ruler-container > .ruler > .ruler-wrapper > .rule:first-of-type::before {
-  -webkit-transform: unset;
-          transform: unset;
-}
-
-.timeline-container > .timeline > .timeline-item.ruler-container > .ruler > .ruler-wrapper > .rule:last-of-type::before {
-  -webkit-transform: translateX(-100%);
-          transform: translateX(-100%);
-}
-
-.timeline-container > .timeline > .timeline-item > .line-label {
-  font-weight: bold;
-  text-align: left;
-  max-width: 10vw;
-  overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-toggle {
-  margin: 14px 30px 14px 15px;
-  cursor: pointer;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-toggle:after {
-  content: '';
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -ms-flex-line-pack: center;
-      align-content: center;
-  width: 16px;
-  height: 16px;
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  color: white;
-  line-height: 1em;
-  background-color: white;
-  border-radius: 4px;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked::after {
-  content: '\25A0';
-  background-color: inherit;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked,
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked ~ .line-container[tracked] > .line-event,
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked ~ .line-container[tracked] > .line-wrapper[startvisible] > .line::before,
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked ~ .line-container[tracked] > .line-wrapper[endvisible] > .line::after {
-  -webkit-transform: scale(1.25);
-          transform: scale(1.25);
-}
-
-.timeline-container > .timeline > .timeline-item > .line-toggle:checked ~ .line-container[tracked] .line > .line-label {
-  -webkit-transform: scale(1.1);
-          transform: scale(1.1);
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container {
-  width: 99%;
-  padding: 0px 12px;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper {
-  width: calc(100% - 24px);
-  height: 100%;
-  position: absolute;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper[startvisible] > .line::before,
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper[endvisible] > .line::after {
-  content: '';
-  display: block;
-  position: absolute;
-  height: 20px;
-  width: 8px;
-  top: -6px;
-  background: inherit;
-  border-radius: 50px;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper[startvisible] > .line::before {
-  left: -4px;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper[endvisible] > .line::after {
-  right: -4px;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line {
-  position: absolute;
-  top: calc(50% - 4px);
-  height: 8px;
-  color: white;
-  text-align: center;
-  text-shadow: 0px 0px 2px black;
-  z-index: 0 !important;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event {
-  padding: 6px;
-  margin-left: -8px;
-  position: absolute;
-  top: 12.5px;
-  text-shadow: none;
-  background-color: inherit;
-  border: 2px solid white;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
-  cursor: pointer !important;
-  z-index: 0 !important;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:hover:not(:active)::before, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:hover:not(:active)::after, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:focus:not(:active)::before, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:focus:not(:active)::after, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event[isSelected]:not(:active)::before, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event[isSelected]:not(:active)::after {
-  content: '';
-  display: block;
-  position: absolute;
-  -webkit-transform: translateX(-50%);
-          transform: translateX(-50%);
-  z-index: 1000 !important;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:hover:not(:active)::before, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:focus:not(:active)::before, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event[isSelected]:not(:active)::before {
-  width: 0px;
-  height: 0px;
-  top: calc(100% + 0.5px);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 6px solid white;
-}
-
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:hover:not(:active)::after, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:focus:not(:active)::after, .timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event[isSelected]:not(:active)::after {
-  content: attr(label) " (" attr(posn) ")";
-  width: -webkit-max-content;
-  width: -moz-max-content;
-  width: max-content;
-  padding: 2px 4px;
-  top: calc(100% + 5.5px);
-  color: #170A1C;
-  font-size: 0.66rem;
-  background-color: white;
-  border-radius: 4px;
-}
-
-.timeline-container > .timeline-bottom {
-  width: 100%;
-}
-
-.timeline-container > .timeline-bottom > .timeline-scrollbar {
-  height: 4px;
-}
-
-.timeline-container > .timeline-bottom > .timeline-scrollbar > .scrollbar-thumb {
-  height: 100%;
-  background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(255, 255, 255, 0.15)), to(transparent));
-  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
-  -webkit-filter: blur(2px);
-          filter: blur(2px);
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
-  -webkit-box-align: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
-  width: 100%;
-  height: 3rem;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-  -webkit-user-drag: none;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls svg + * {
-  margin-left: 5px !important;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > * {
+  overflow: hidden;
   -webkit-box-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls button {
-  margin: 0px;
-  padding: 0px;
-  font-size: 1rem;
-  color: white;
+.timeline-container > .timeline-container-header > .menu-button,
+.timeline-container > .timeline-container-header > .expand-collapse-button {
+  font-size: inherit;
   background: transparent;
   border: none;
-  outline: none;
   cursor: pointer;
+  outline: none;
+}
+
+.timeline-container > .timeline-container-header > .menu-button:not(:hover):not(:focus),
+.timeline-container > .timeline-container-header > .expand-collapse-button:not(:hover):not(:focus) {
   opacity: 0.5;
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls button:focus:not(:active) {
-  opacity: 1;
+.timeline-container > .timeline-container-header > .menu-button:is(:hover, :focus).menu-button,
+.timeline-container > .timeline-container-header > .expand-collapse-button:is(:hover, :focus).menu-button {
+  background: -webkit-gradient(linear, left top, right bottom, from(rgba(255, 255, 255, 0.25)), color-stop(transparent), to(transparent));
+  background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.25), transparent, transparent);
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls button.clear-button {
-  border-color: rgba(255, 0, 0, 0.5);
-  color: red;
+.timeline-container > .timeline-container-header > .menu-button:is(:hover, :focus).expand-collapse-button,
+.timeline-container > .timeline-container-header > .expand-collapse-button:is(:hover, :focus).expand-collapse-button {
+  background: -webkit-gradient(linear, right top, left bottom, from(rgba(255, 255, 255, 0.25)), color-stop(transparent), to(transparent));
+  background: linear-gradient(to bottom left, rgba(255, 255, 255, 0.25), transparent, transparent);
 }
 
-.timeline-container > .timeline-bottom > .timeline-controls button.clear-button:hover:not(:active), .timeline-container > .timeline-bottom > .timeline-controls button.clear-button:focus:not(:active) {
-  border-color: red !important;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > span {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  font-size: 1rem;
-  font-size: monospace;
-  color: white;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > span > * + * {
-  margin-left: 10px;
-}
-
-.timeline-container > .timeline-bottom > .timeline-controls > span button {
-  padding: 2px 6px;
-  border: 1px solid white;
-  border-radius: 4px;
-}
-
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event:hover:not(:active)::before,
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event:focus:not(:active)::before,
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event[isselected]:not(:active)::before {
-  top: unset !important;
-  bottom: calc(100% + 0.5px);
-  border-bottom: none !important;
-  border-top: 6px solid white;
-}
-
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event:hover:not(:active)::after,
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event:focus:not(:active)::after,
-.timeline > .timeline-item:last-of-type > .line-container > .line-wrapper > .line-event[isselected]:not(:active)::after {
-  top: unset !important;
-  bottom: calc(100% + 5.5px);
-}
-
-.timeline > .timeline-item > .line-container:not([tracked]) > .line-wrapper > .line,
-.timeline > .timeline-item > .line-container:not([tracked]) > .line-wrapper > .line-event:not([isselected]):not(:hover),
-.timeline > .timeline-item > .line-toggle:not(:checked) + .line-container > .line-wrapper > .line,
-.timeline > .timeline-item > .line-toggle:not(:checked) + .line-container > .line-wrapper > .line-event:not([isselected]):not(:hover) {
-  opacity: 0.25;
-}
-
-.timeline > .timeline-item > .line-container:not([tracked]) > .line-wrapper > .line-event:not([isselected]):not(:hover),
-.timeline > .timeline-item > .line-toggle:not(:checked) + .line-container > .line-wrapper > .line-event:not([isselected]):not(:hover) {
-  background: transparent !important;
-}
-
-.timeline > .timeline-item > .line-container > .line-wrapper > .line-event:hover:not(:active),
-.timeline > .timeline-item > .line-container > .line-wrapper > .line-event:active:not(:active),
-.timeline > .timeline-item > .line-container > .line-wrapper > .line-event[isselected]:not(:active),
-.timeline > .timeline-item > .line-toggle:hover:not(:active) {
-  -webkit-transform: scale(1.5) !important;
-          transform: scale(1.5) !important;
-}
-
-.timeline > .timeline-item > .line-container:not([tracked]) {
-  height: 0px !important;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-}
-
-.timeline-container > .timeline > .timeline-item > .ruler > .ruler-wrapper > .rule:not([posnvisible]),
-.timeline-container > .timeline > .timeline-item > .line-container > .line-wrapper > .line-event:not([posnvisible]) {
-  display: none;
+.timeline-container > .timeline-container-header > .menu-button > svg:first-child,
+.timeline-container > .timeline-container-header > .expand-collapse-button > svg:first-child {
+  width: 2ch;
+  margin-right: 1ch;
 }
 /*# sourceMappingURL=style.css.map */

@@ -1,0 +1,240 @@
+.timeline-container > .timeline-container-body > .overlay-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+
+    display: flex;
+    width: 100%;
+    height: 100%;
+    
+    background: var(--primary-background-transparent);
+    backdrop-filter: blur(0.375em);
+    
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.2s ease;
+    
+    &[expanded] {
+        opacity: 1;
+        pointer-events: unset;
+    }
+
+    // General stylings for any individual overlay
+    & > * {
+        max-height: 100%;
+        overflow-y: scroll;
+
+        margin: 0;
+        padding: 0;
+        flex-grow: 99;
+        
+        text-align: left;
+    }
+}
+
+// The menu which displays as default on any overlay
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay {
+    flex-grow: 1;
+    list-style: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    // Each menu item
+    & > li {
+        padding: 1.25em 1.5em;
+        cursor: pointer;
+        user-select: none;
+        outline: none;
+
+        & > svg {
+            width: 2ch;
+            margin: 0 1ch 0 0;
+        }
+        
+        &:is(:hover, :focus):not(:active) {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
+        }
+    }
+
+    // The menu collapses to hide item labels when it has a neighbor
+    &:not(:last-child) > li {
+        text-align: center;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.125);
+        }
+        & > svg {
+            margin: 0;
+        }
+        & > span {
+            display: none;
+        }
+    }
+}
+
+// Breadcrumbs element used in both Navigation and Notes overlays
+.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs {
+    margin: 0;
+    font-weight: normal;
+    outline: none;
+    transition: 0.2s ease;
+
+    user-select: none;
+
+    & > * {
+        display: inline-block;
+        vertical-align: middle;
+    }
+    & > * + * {
+        margin-left: 1ch;
+    }
+    & > svg {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    // Button/Select elements
+    & > .clear-select,
+    & > .timeline-select,
+    & > .event-select {
+        padding: 1.25rem 1.5rem;
+
+        color: inherit;
+        font-size: inherit;
+        background: transparent;
+        border: none;
+        outline: none;
+        cursor: pointer;
+
+        transition: 0.2s ease;
+
+        &:hover:not(:active), &:focus {
+            background-color: rgba(255, 255, 255, 0.125);
+        }
+
+        & > option {
+            color: black;
+        }
+    }
+}
+
+// The Naviation element shows a file explorer view
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
+    padding: 0 1em 1em 0;
+
+    hr {
+        opacity: 0.5;
+    }
+
+    .file-view-label {
+        margin-bottom: 1em;
+    }
+    
+    // The list of elements at the current location
+    .file-view {
+        display: table;
+        padding: 0;
+        margin: 0;
+        
+        border: 0.125em solid white;
+        border-collapse: collapse;
+        
+        user-select: none;
+
+        // Individual list items
+        .file-view-header,
+        .file-view-timeline-item,
+        .file-view-event-item {
+            display: table-row;
+            cursor: pointer;
+            transition: 0.2s ease;
+
+            &.file-view-header {
+                color: var(--primary-background);
+                font-weight: bold;
+                background: white;
+
+                & > * {
+                    padding: 0.25em 1.5em;
+                }
+                & > * + * {
+                    border-left: 0.125em solid var(--primary-background);
+                }
+            }
+
+            &.file-view-timeline-item,
+            &.file-view-event-item {
+                &:hover {
+                    background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
+    
+                    & > .item-label {
+                        text-decoration: underline;
+                    }
+                    & > .item-control .item-open-button,
+                    & > .item-control .item-navigate-button {
+                        border-color: white;
+                    }
+                }
+                
+                & > .item-control {
+                    padding: 0.5em 0.75em;
+
+                    // Control buttons
+                    & > .item-open-button,
+                    & > .item-navigate-button {
+                        padding: 0.5em 0.75em;
+                        border-radius: 50em;
+
+                        font-size: 1em;
+                        background: transparent;
+                        border: 0.125em solid transparent;
+
+                        opacity: 0.5;
+                        outline: none;
+                        cursor: pointer;
+
+                        &:hover:not(:active),
+                        &:focus {
+                            opacity: 1;
+                        }
+
+                        * + * {
+                            margin-left: 1ch;
+                        }
+                        svg {
+                            width: 2ch;
+                        }
+                    }
+                }
+
+            }
+
+            // Individual row items displaying info
+            & > * {
+                display: table-cell;
+                width: calc(99%);
+                padding: 1em 1.5em;
+                white-space: nowrap;
+
+                &:not(.item-label) {
+                    text-align: center;
+                }
+            }
+        }
+    }
+}
+
+// The Notes overlay which displays information about the selected object
+.timeline-container > .timeline-container-body > .overlay-layer .notes-section {
+    margin: 1em 0 3em;
+    
+    .selected-label {
+        font-size: 1.7em;
+        font-weight: bold;
+    }
+    .selected-notes {
+        margin-top: 1em;
+    }
+}
