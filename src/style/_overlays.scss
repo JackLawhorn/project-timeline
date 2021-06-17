@@ -37,6 +37,7 @@
 .timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay {
     flex-grow: 1;
     list-style: none;
+    overflow: visible;
 
     &::-webkit-scrollbar {
         display: none;
@@ -63,13 +64,28 @@
     &:not(:last-child) > li {
         text-align: center;
 
-        &:hover {
+        &[isopen] {
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.25), transparent, transparent);
+
+            &::before {
+                content: '';
+                display: block;
+                position: absolute;
+                inset: 0;
+                right: unset;
+                width: 0.25em;
+                background: white;
+            }
+        }
+
+        &:is(:hover, :focus):not(:active) {
             background: rgba(255, 255, 255, 0.125);
         }
-        & > svg {
+
+        svg {
             margin: 0;
         }
-        & > span {
+        span {
             display: none;
         }
     }
@@ -122,119 +138,179 @@
 
 // The Naviation element shows a file explorer view
 .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
-    padding: 0 1em 1em 0;
+    padding-bottom: 1em;
 
-    hr {
-        opacity: 0.5;
+    .notes-section {
+        margin: 1em 0 2em;
+        
+        .selected-label {
+            font-size: 1.7em;
+            font-weight: bold;
+        }
+        .selected-notes {
+            margin-top: 1em;
+        }
     }
 
-    .file-view-label {
-        margin-bottom: 1em;
+    .hr {
+        border-top: 0.125em solid rgba(255, 255, 255, 0.125);
     }
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay {    
+    padding-bottom: 1em;
+
+    .search-controls {
+        width: 100%;
+        display: flex;
+
+        * {
+            padding: 1.375em;
     
-    // The list of elements at the current location
-    .file-view {
-        display: table;
-        padding: 0;
-        margin: 0;
-        
-        border: 0.125em solid white;
-        border-collapse: collapse;
-        
-        user-select: none;
+            background: transparent;
+            border: none;
+            outline: none;
+            
+            color: inherit;
+            font-size: inherit;
+            
+            &:is(:hover, :focus-within) {
+                background: rgba(255, 255, 255, 0.125);
+            }
+        }
 
-        // Individual list items
-        .file-view-header,
-        .file-view-timeline-item,
-        .file-view-event-item {
-            display: table-row;
+        .search-field {
+            flex-grow: 1;
+
+            &::placeholder {
+                color: white;
+            }
+        }
+
+        .search-filter {
             cursor: pointer;
-            transition: 0.2s ease;
 
-            &.file-view-header {
+            & > option {
                 color: var(--primary-background);
-                font-weight: bold;
-                background: white;
-
-                & > * {
-                    padding: 0.25em 1.5em;
-                }
-                & > * + * {
-                    border-left: 0.125em solid var(--primary-background);
-                }
-            }
-
-            &.file-view-timeline-item,
-            &.file-view-event-item {
-                &:hover {
-                    background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
-    
-                    & > .item-label {
-                        text-decoration: underline;
-                    }
-                    & > .item-control .item-open-button,
-                    & > .item-control .item-navigate-button {
-                        border-color: white;
-                    }
-                }
-                
-                & > .item-control {
-                    padding: 0.5em 0.75em;
-
-                    // Control buttons
-                    & > .item-open-button,
-                    & > .item-navigate-button {
-                        padding: 0.5em 0.75em;
-                        border-radius: 50em;
-
-                        font-size: 1em;
-                        background: transparent;
-                        border: 0.125em solid transparent;
-
-                        opacity: 0.5;
-                        outline: none;
-                        cursor: pointer;
-
-                        &:hover:not(:active),
-                        &:focus {
-                            opacity: 1;
-                        }
-
-                        * + * {
-                            margin-left: 1ch;
-                        }
-                        svg {
-                            width: 2ch;
-                        }
-                    }
-                }
-
-            }
-
-            // Individual row items displaying info
-            & > * {
-                display: table-cell;
-                width: calc(99%);
-                padding: 1em 1.5em;
-                white-space: nowrap;
-
-                &:not(.item-label) {
-                    text-align: center;
-                }
             }
         }
     }
 }
 
-// The Notes overlay which displays information about the selected object
-.timeline-container > .timeline-container-body > .overlay-layer .notes-section {
-    margin: 1em 0 3em;
-    
-    .selected-label {
-        font-size: 1.7em;
+.timeline-container .overlay-layer .timeline-item-list {
+    margin: 0px;
+    padding: 0px;
+
+    .list-header {
+        display: flex;
+        width: 100%;
+        
+        & > * {
+            padding: 1em;
+        }
+        .list-item-count {
+            flex-grow: 1;
+        }
+        .list-detail-toggle {
+            font-size: inherit;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+
+            & > svg {
+                width: 2ch;
+                margin-right: 1ch;
+            }
+
+            &:is(:hover, :focus):not(:active) {
+                background: rgba(255, 255, 255, 0.125);
+            }
+        }
+    }
+
+    .list-body {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .list-item {
+        display: table-row;
+        color: white;
+        border-bottom: 0.25em dotted rgba(255, 255, 255, 0.125);
+        outline: none;
+                
+        &:is(:hover, :focus):not(:active) {
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03125), transparent);
+            
+            &:not([eventlabel]) > .item-summary-cell {
+                border-left-width: 1.5em !important;
+                padding-left: 1em;
+            }
+            
+            &[eventlabel] > .item-summary-cell {
+                padding-left: 2em;
+            }
+        }
+        
+        .item-summary-cell {
+            transition: 0.2s ease;
+            border-left: 0px solid transparent;
+        }
+        &:not([eventlabel]) > .item-summary-cell {
+            border-left-width: 0.5em !important;
+            padding-left: 1em !important;
+        }
+        & > :not(.item-summary-cell) {
+            vertical-align: middle;
+            font-size: 1.5em;
+            text-align: center;
+            opacity: 0.25;
+        }
+
+
+        & > * {
+            display: table-cell;
+            padding: 1em;
+        }
+
+        .item-label {
+            display: inline-block;
+            font-size: 1.17em;
+            font-weight: bolder;
+        }
+        .item-notes {
+            margin-top: 0.5em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+.timeline-container .overlay-layer .parent-label {
+    margin-bottom: 0.5em;
+
+    span {
         font-weight: bold;
     }
-    .selected-notes {
-        margin-top: 1em;
+    & > svg {
+        width: 2ch;
+        margin: 0 1ch;
+
+        opacity: 0.5;
+        
+        &:last-of-type {
+            opacity: 0.25;
+        }
+    }
+}
+.timeline-container .link-button {
+    cursor: pointer;
+
+    &:is(:hover, :focus):not(:active) {
+        text-decoration: underline;
+        text-decoration-thickness: 0.15em;
+        text-underline-offset: 0.25em;
     }
 }

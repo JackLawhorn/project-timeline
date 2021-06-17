@@ -4,6 +4,7 @@
   width: 100%;
   margin: 0;
   padding: 0 0 0.5em;
+  z-index: 500;
   list-style: none;
   white-space: nowrap;
   -webkit-user-select: none;
@@ -71,7 +72,8 @@
 
 .timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-name:is(:hover, :focus):not(:active) {
   text-decoration: underline;
-  text-decoration-thickness: 0.1875em;
+  text-decoration-thickness: 0.15em;
+  text-underline-offset: 0.25em;
 }
 
 .timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-container {
@@ -170,6 +172,7 @@
   position: absolute;
   bottom: 0;
   background: inherit;
+  z-index: 500;
 }
 
 .timeline-container > .timeline-container-body > .timeline-bottom > .timeline-scrollbar {
@@ -293,6 +296,7 @@
       -ms-flex-positive: 1;
           flex-grow: 1;
   list-style: none;
+  overflow: visible;
 }
 
 .timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay::-webkit-scrollbar {
@@ -323,15 +327,30 @@
   text-align: center;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li:hover {
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li[isopen] {
+  background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0.25)), color-stop(transparent), to(transparent));
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.25), transparent, transparent);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li[isopen]::before {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  right: unset;
+  width: 0.25em;
+  background: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li:is(:hover, :focus):not(:active) {
   background: rgba(255, 255, 255, 0.125);
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li > svg {
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li svg {
   margin: 0;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li > span {
+.timeline-container > .timeline-container-body > .overlay-layer > .menu-overlay:not(:last-child) > li span {
   display: none;
 }
 
@@ -389,196 +408,207 @@
 }
 
 .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
-  padding: 0 1em 1em 0;
+  padding-bottom: 1em;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay hr {
-  opacity: 0.5;
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .notes-section {
+  margin: 1em 0 2em;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view-label {
-  margin-bottom: 1em;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view {
-  display: table;
-  padding: 0;
-  margin: 0;
-  border: 0.125em solid white;
-  border-collapse: collapse;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item {
-  display: table-row;
-  cursor: pointer;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header {
-  color: var(--primary-background);
-  font-weight: bold;
-  background: white;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header > *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header > *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header > * {
-  padding: 0.25em 1.5em;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-header > * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-header > * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-header > * + * {
-  border-left: 0.125em solid var(--primary-background);
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover {
-  background: -webkit-gradient(linear, left top, right top, from(rgba(255, 255, 255, 0.125)), to(transparent));
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.125), transparent);
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-label, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-label,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-label,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-label,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-label,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-label {
-  text-decoration: underline;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item:hover > .item-control .item-navigate-button, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item:hover > .item-control .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item:hover > .item-control .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item:hover > .item-control .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item:hover > .item-control .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-control .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item:hover > .item-control .item-navigate-button {
-  border-color: white;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control {
-  padding: 0.5em 0.75em;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button {
-  padding: 0.5em 0.75em;
-  border-radius: 50em;
-  font-size: 1em;
-  background: transparent;
-  border: 0.125em solid transparent;
-  opacity: 0.5;
-  outline: none;
-  cursor: pointer;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button:focus, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button:focus,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button:focus {
-  opacity: 1;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button * + *, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button * + *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button * + * {
-  margin-left: 1ch;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-timeline-item > .item-control > .item-navigate-button svg, .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header.file-view-event-item > .item-control > .item-navigate-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-timeline-item > .item-control > .item-navigate-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item.file-view-event-item > .item-control > .item-navigate-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-timeline-item > .item-control > .item-navigate-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-open-button svg,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item.file-view-event-item > .item-control > .item-navigate-button svg {
-  width: 2ch;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header > *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item > *,
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item > * {
-  display: table-cell;
-  width: calc(99%);
-  padding: 1em 1.5em;
-  white-space: nowrap;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-header > *:not(.item-label),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-timeline-item > *:not(.item-label),
-.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .file-view .file-view-event-item > *:not(.item-label) {
-  text-align: center;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .notes-section {
-  margin: 1em 0 3em;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .notes-section .selected-label {
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .notes-section .selected-label {
   font-size: 1.7em;
   font-weight: bold;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer .notes-section .selected-notes {
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .notes-section .selected-notes {
   margin-top: 1em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .main-overlay .hr {
+  border-top: 0.125em solid rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay {
+  padding-bottom: 1em;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls * {
+  padding: 1.375em;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls *:is(:hover, :focus-within) {
+  background: rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-field {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-field::-webkit-input-placeholder {
+  color: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-field:-ms-input-placeholder {
+  color: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-field::-ms-input-placeholder {
+  color: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-field::placeholder {
+  color: white;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-filter {
+  cursor: pointer;
+}
+
+.timeline-container > .timeline-container-body > .overlay-layer > .search-overlay .search-controls .search-filter > option {
+  color: var(--primary-background);
+}
+
+.timeline-container .overlay-layer .timeline-item-list {
+  margin: 0px;
+  padding: 0px;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header > * {
+  padding: 1em;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header .list-item-count {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header .list-detail-toggle {
+  font-size: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header .list-detail-toggle > svg {
+  width: 2ch;
+  margin-right: 1ch;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-header .list-detail-toggle:is(:hover, :focus):not(:active) {
+  background: rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-body {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item {
+  display: table-row;
+  color: white;
+  border-bottom: 0.25em dotted rgba(255, 255, 255, 0.125);
+  outline: none;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active) {
+  background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(255, 255, 255, 0.03125)), to(transparent));
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03125), transparent);
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active):not([eventlabel]) > .item-summary-cell {
+  border-left-width: 1.5em !important;
+  padding-left: 1em;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active)[eventlabel] > .item-summary-cell {
+  padding-left: 2em;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item .item-summary-cell {
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+  border-left: 0px solid transparent;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item:not([eventlabel]) > .item-summary-cell {
+  border-left-width: 0.5em !important;
+  padding-left: 1em !important;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item > :not(.item-summary-cell) {
+  vertical-align: middle;
+  font-size: 1.5em;
+  text-align: center;
+  opacity: 0.25;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item > * {
+  display: table-cell;
+  padding: 1em;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item .item-label {
+  display: inline-block;
+  font-size: 1.17em;
+  font-weight: bolder;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item .item-notes {
+  margin-top: 0.5em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-container .overlay-layer .parent-label {
+  margin-bottom: 0.5em;
+}
+
+.timeline-container .overlay-layer .parent-label span {
+  font-weight: bold;
+}
+
+.timeline-container .overlay-layer .parent-label > svg {
+  width: 2ch;
+  margin: 0 1ch;
+  opacity: 0.5;
+}
+
+.timeline-container .overlay-layer .parent-label > svg:last-of-type {
+  opacity: 0.25;
+}
+
+.timeline-container .link-button {
+  cursor: pointer;
+}
+
+.timeline-container .link-button:is(:hover, :focus):not(:active) {
+  text-decoration: underline;
+  text-decoration-thickness: 0.15em;
+  text-underline-offset: 0.25em;
 }
 
 :root {

@@ -1,8 +1,8 @@
 import React from 'react';
 import $ from 'jquery';
 
-import { faArrowRight, faBookOpen, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TimelineItemList, generateList, translateItem } from '../TimelineItemList';
+import Breadcrumbs from '../Breadcrumbs';
 
 class MainOverlay extends React.Component {
     constructor(props) {
@@ -37,16 +37,24 @@ class MainOverlay extends React.Component {
         });
     }
 
+    get getAllChildren() {
+        const { selectedTimeline, selectedEvent, } = this.state,
+            sort = (a, b) => a > b;
+
+        console.log(selectedTimeline);
+        
+        if(selectedTimeline === null)
+            return generateList(this.state.source, () => true, () => false, sort);
+        else if(selectedTimeline !== null && selectedEvent === null)
+            return generateList(this.state.source, () => false, (event) => event.timelines.indexOf(selectedTimeline.label) >= 0, sort);
+    }
+
     handleGoToProjectRoot(e) {
         this.handleSelect(null);
     }
 
     handleSelectTimeline(e) {
-        let timelineLabel = "";
-        if($(e.target).hasClass("timeline-select"))
-            timelineLabel = $(e.target).attr("value");
-        else
-            timelineLabel = $(e.target).closest(".file-view-timeline-item").attr("value");
+        let timelineLabel = $(e.target).closest("[timeline]").attr("timeline");
 
         this.handleSelect(timelineLabel);
     }
@@ -56,7 +64,7 @@ class MainOverlay extends React.Component {
         if($(e.target).hasClass("event-select"))
             eventLabel = $(e.target).attr("value");
         else
-            eventLabel = $(e.target).closest(".file-view-event-item").attr("value");
+            eventLabel = $(e.target).closest(".list-item").attr("value");
 
         this.handleSelect(this.state.selectedTimeline.label, eventLabel);
     }
@@ -71,106 +79,33 @@ class MainOverlay extends React.Component {
     }
 
     fullRender() {
-        const { source, selectedTimeline, selectedEvent } = this.state,
-              handleGoToProjectRoot = this.handleGoToProjectRoot,
-              handleSelectTimeline = this.handleSelectTimeline,
-              handleSelectEvent = this.handleSelectEvent;
+        const { selectedTimeline, selectedEvent } = this.state,
+              handleSelect = this.handleSelect,
+              handleSelectTimeline = this.handleSelectTimeline;
         
-        let fileViewList = [],
-            selectedObject = selectedEvent ?? selectedTimeline ?? null;
-        if(selectedTimeline !== null) fileViewList = selectedTimeline.events;
-        else fileViewList = source;
+        let allChildren = this.getAllChildren,
+            selectedObject = this.state.selectedEvent ?? this.state.selectedTimeline ?? this.state.source;
+        if(selectedTimeline !== null) selectedObject.timeline = selectedTimeline.label;
 
         return (
             <div className="main-overlay">
-                <div className="selected-breadcrumbs">
-                    <div className="clear-select" onClick={handleGoToProjectRoot}>Project</div>
-                    {
-                        selectedTimeline !== null &&
-                            <FontAwesomeIcon icon={faChevronRight} />
-                    }
-                    {
-                        (selectedTimeline !== null && selectedEvent === null) &&
-                            <select className="timeline-select" value={selectedTimeline.label}
-                                    onChange={handleSelectTimeline}>
-                                {
-                                    source.map((line, i) => {
-                                        return (<option value={line.label} key={i}>{line.label}</option>)
-                                    })
-                                }
-                            </select>
-                    }
-                    {
-                        (selectedTimeline !== null && selectedEvent !== null) &&
-                            <div className="timeline-select" value={selectedTimeline.label}
-                                onClick={handleSelectTimeline}>
-                                {selectedTimeline.label}
-                            </div>
-                    }
-                    {
-                        selectedTimeline !== null && selectedEvent !== null &&
-                            <FontAwesomeIcon icon={faChevronRight} />
-                    }
-                    {
-                        selectedTimeline !== null && selectedEvent !== null &&
-                            <select className="event-select" value={selectedEvent.label}
-                                    onChange={handleSelectEvent}>
-                                {
-                                    selectedTimeline.events.map((event, i) => {
-                                        return (<option value={event.label} key={i}>{event.label}</option>)
-                                    })
-                                }
-                            </select>
-                    }
-                </div>
                 {
-                    selectedObject !== null && 
-                        <div className="notes-section">
-                            <div className="selected-label">{ selectedObject.label }</div>
-                            <div className="selected-notes">{ selectedObject.notes }</div>
-                        </div>
+                    selectedObject.type !== "project" &&
+                        <Breadcrumbs item={translateItem(selectedObject, selectedTimeline)}
+                            handleSelect={handleSelect}
+                            handleSelectTimeline={handleSelectTimeline} /> 
                 }
+                <div className="notes-section">
+                    <div className="selected-label">{ selectedObject.label }</div>
+                    <div className="selected-notes">{ selectedObject.notes }</div>
+                </div>
+                <div className="hr" />
                 {
                     selectedEvent===null &&
-                        <div>
-                            {/* { selectedTimeline!==null && <hr /> } */}
-                            {
-                                selectedTimeline!==null && (
-                                    <div className="file-view-label">
-                                        <b>{ selectedObject.label }</b>'s contents...
-                                    </div>)
-                            }
-                            <table className="file-view">
-                                <tbody>
-                                    <tr className="file-view-header">
-                                        <th className="item-label">Name</th>
-                                        <th className="item-type">Type</th>
-                                        <th className="item-posn">Position</th>
-                                    </tr>
-                                    {
-                                        fileViewList.map((item, i) =>
-                                            <tr className={selectedTimeline === null ? "file-view-timeline-item" : "file-view-event-item"}
-                                                value={item.label} key={i}
-                                                onClick={selectedTimeline === null ? handleSelectTimeline : handleSelectEvent}>
-                                                <td className="item-label"
-                                                    style={{ borderColor: item.color || "transparent", }}>
-                                                    {item.label}
-                                                </td>
-                                                <td className="item-posn">{ selectedTimeline === null ? "Timeline" : "Event" }</td>
-                                                <td className="item-posn">
-                                                    {
-                                                        selectedTimeline === null ?
-                                                            item.start + " – " + item.end :
-                                                            item.posn
-                                                    }
-                                                </td>
-                                            </tr>
-                                        )
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
+                        <TimelineItemList
+                            list={allChildren}
+                            label="children"
+                            handleSelect={handleSelect} /> }
             </div>
         )
     }

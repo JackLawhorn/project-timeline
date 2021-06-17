@@ -2,20 +2,31 @@ import React from 'react';
 import $ from 'jquery';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faBars, faInfo, faSearch, faTimes, faEye, faEyeSlash, faExpand, faCompress, faFileDownload } from '@fortawesome/free-solid-svg-icons';
-import { faFolderOpen, faClipboard } from '@fortawesome/free-regular-svg-icons';
+import { faFolderOpen, faClipboard, faBars, faInfo, faSearch, faTimes, faEye, faEyeSlash, faExpand, faCompress, faFileDownload } from '@fortawesome/free-solid-svg-icons';
+import {  } from '@fortawesome/free-regular-svg-icons';
 
 import MainOverlay from './overlays/MainOverlay';
+import SearchOverlay from './overlays/SearchOverlay';
 
 class Timeline extends React.Component {
     constructor(props) {  
         super(props);
 
-        let source = props.source.concat([]);
-        source.forEach(function(line, i) {
-            line.events.forEach(function(event, j) {
-                event.posn = Math.round(Math.random()*(line.end-line.start) + line.start);
-            })
+        const source = props.source;
+        Object.values(source.events).forEach(function(event, i) {
+            const timelines = event.timelines.map(key => source.timelines[key]);
+            let earliestDate, latestDate;
+            timelines.forEach(function(val, i) {
+                if(i == 0) {
+                    earliestDate = val.start;
+                    latestDate = val.end;
+                    return;
+                }
+                if(val.start < earliestDate) return (earliestDate = val.start);
+                if(val.start > latestDate) return (latestDate = val.start);
+            });
+
+            event.posn = Math.round(Math.random()*(latestDate-earliestDate) + earliestDate);
         });
 
         this.state = {
@@ -89,14 +100,10 @@ class Timeline extends React.Component {
         const { source, selectedTimeline: selectedTimelineLabel, selectedEvent: selectedEventLabel } = this.state;
         if(selectedTimelineLabel === null) return result;
 
-        result.timeline = source.find((line) => {
-            return line.label === selectedTimelineLabel;
-        });
+        result.timeline = source.timelines[selectedTimelineLabel];
         if(selectedEventLabel === null) return result;
 
-        result.event = result.timeline.events.find((event) => {
-            return event.label === selectedEventLabel;
-        });
+        result.event = source.events[selectedEventLabel];
         return result;
     }
 
@@ -106,7 +113,7 @@ class Timeline extends React.Component {
      */
     get allUniqueDates() {
         let datesList = [];
-        this.state.source.forEach(function(line) {
+        Object.values(this.state.source.timelines).forEach(function(line) {
             if(!(line.start in datesList)) datesList.push(line.start);
             if(!(line.end in datesList)) datesList.push(line.end);
         });
@@ -121,7 +128,7 @@ class Timeline extends React.Component {
     get boundsAndLength() {
         let earliestDate = undefined,
             latestDate = undefined;
-        this.state.source.forEach(function(line) {
+        Object.values(this.state.source.timelines).forEach(function(line) {
             if(earliestDate === undefined) {
                 earliestDate = line.start;
                 latestDate = line.end;
@@ -336,7 +343,7 @@ class Timeline extends React.Component {
      */
     handleToggleLine(e) {
         let disabledArray = this.state.disabledArray.concat([]);
-        this.state.source.forEach(function(line, i) {
+        Object.values(this.state.source.timelines).forEach(function(line, i) {
             if(line.label === $(e.target).closest(".timeline-item").attr("label"))
                 disabledArray[i] = !disabledArray[i];
         })
@@ -385,11 +392,6 @@ class Timeline extends React.Component {
         });
     }
     /**
-     * Closes the overlay displayed on top of the Timelines view
-     * @helper {@link Timeline#setOverlay}
-     */
-    closeOverlay = () => this.setOverlay("none");
-    /**
      * Opens the menu overlay
      * @helper {@link Timeline#setOverlay}
      */
@@ -399,6 +401,11 @@ class Timeline extends React.Component {
      * @helper {@link Timeline#setOverlay}
      */
     openNavigation = () => this.setOverlay("main");
+    /**
+     * Opens the search overlay
+     * @helper {@link Timeline#setOverlay}
+     */
+     openSearch = () => this.setOverlay("search");
 
     toggleFullscreen = () => this.setState({
         fullscreen: !this.state.fullscreen,
@@ -494,9 +501,9 @@ class Timeline extends React.Component {
               
               // Get all necessary menu methods
               toggleFullscreen = this.toggleFullscreen,
-              closeOverlay = this.closeOverlay,
               toggleMenu = this.toggleMenu,
               openNavigation = this.openNavigation,
+              openSearch = this.openSearch,
               handleSaveToFile = this.handleSaveToFile,
               handleCopyAsJSON = this.handleCopyAsJSON,
 
@@ -511,8 +518,8 @@ class Timeline extends React.Component {
                  onKeyDown={handleKeyPress} >
                 <header className="timeline-container-header">
                     <button className="menu-button" onClick={toggleMenu}>
-                        <FontAwesomeIcon icon={this.state.overlay==="none"?faBars:faArrowLeft} />
-                        <span>{this.state.overlay==="none"?"Menu":"Back"}</span>
+                        <FontAwesomeIcon icon={this.state.overlay==="none"?faBars:faTimes} />
+                        <span>{this.state.overlay==="none"?"Menu":"Close"}</span>
                     </button>
                     <div className="project-title">Project Timelines</div>
                     <button className="expand-collapse-button" onClick={toggleFullscreen}>
@@ -525,19 +532,23 @@ class Timeline extends React.Component {
                         {
                             overlay !== "none" &&
                                 <ul className="menu-overlay">
-                                    {/* <li className="search-button" tabIndex={overlay==="none"?"-1":"0"} >
+                                    <li className="search-button" tabIndex={overlay==="none"?"-1":"0"}
+                                        isopen={overlay==="search"?"true":undefined} onClick={openSearch} >
                                         <FontAwesomeIcon icon={faSearch} />
                                         <span>Search</span>
-                                    </li> */}
-                                    <li className="open-navigation" onClick={openNavigation} tabIndex={overlay==="none"?"-1":"0"} >
+                                    </li>
+                                    <li className="open-navigation" tabIndex={overlay==="none"?"-1":"0"}
+                                        isopen={overlay==="main"?"true":undefined} onClick={openNavigation} >
                                         <FontAwesomeIcon icon={faFolderOpen} />
                                         <span>Navigation view</span>
                                     </li>
-                                    <li className="save-button" onClick={handleSaveToFile} tabIndex={overlay==="none"?"-1":"0"} >
+                                    <li className="save-button" tabIndex={overlay==="none"?"-1":"0"}
+                                        onClick={handleSaveToFile} >
                                         <FontAwesomeIcon icon={faFileDownload} />
                                         <span>Download as file</span>
                                     </li>
-                                    <li className="copy-button" onClick={handleCopyAsJSON} tabIndex={overlay==="none"?"-1":"0"} >
+                                    <li className="copy-button" tabIndex={overlay==="none"?"-1":"0"}
+                                        onClick={handleCopyAsJSON} >
                                         <FontAwesomeIcon icon={faClipboard} />
                                         <span>Copy as JSON</span>
                                     </li>
@@ -552,6 +563,12 @@ class Timeline extends React.Component {
                                 <MainOverlay
                                     source={this.state.source}
                                     selectedObject={selectedObject}
+                                    handleSelect={handleSelect} />
+                        }
+                        {
+                            overlay === "search" &&
+                                <SearchOverlay
+                                    source={this.state.source}
                                     handleSelect={handleSelect} />
                         }
                     </div>
@@ -571,7 +588,7 @@ class Timeline extends React.Component {
                             </div>
                         </li>
                         {
-                            source.map((line, i) =>
+                            Object.values(source.timelines).map((line, i) =>
                                 <li className="timeline-item" label={line.label} key={i}
                                     disabled={disabledArray[i] ? "disabled" : undefined}
                                     tracked={isTracked(line) ? "tracked" : undefined}>
@@ -609,7 +626,9 @@ class Timeline extends React.Component {
                                                         />
                                                 }
                                                 {
-                                                    line.events.map((event, j) =>
+                                                    Object.values(source.events).filter(
+                                                        event => event.timelines.indexOf(line.label) >= 0
+                                                    ).map((event, j) =>
                                                         event.posn >= scrollPosn &&
                                                             <g key={j}>
                                                                 <circle className="line-event" posn={event.posn} label={event.label} tabIndex={!disabledArray[i] && isTracked(line) && overlay==="none" ? "0" : undefined}

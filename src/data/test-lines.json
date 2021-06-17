@@ -1,84 +1,111 @@
-[
-    {
-        "label": "Timeline A",
-        "notes": "These are the timeline notes",
-        "start": 0,
-        "end": 50,
-        "color": "crimson",
-        "events": [
-            {
-                "label": "Event A1",
-                "notes": "These are the event notes."
-            },
-            {
-                "label": "Event A2",
-                "notes": "These are the event notes."
-            }
-        ]
+{
+    "type": "project",
+    "label": "Timelines demo",
+    "notes": "The Project is the top-level directory and has as its children all Timelines.",
+    "timelines": {
+        "Timeline A": {
+            "label": "Timeline A",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 0,
+            "end": 50,
+            "color": "crimson"
+        },
+        "Timeline B": {
+            "label": "Timeline B",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 25,
+            "end": 75,
+            "color": "cornflowerblue"
+        },
+        "Timeline C": {
+            "label": "Timeline C",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 50,
+            "end": 100,
+            "color": "gold"
+        },
+        "Timeline D": {
+            "label": "Timeline D",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 12.5,
+            "end": 37.5,
+            "color": "forestgreen"
+        },
+        "Timeline E": {
+            "label": "Timeline E",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 37.5,
+            "end": 62.5,
+            "color": "MediumVioletRed "
+        },
+        "Timeline F": {
+            "label": "Timeline F",
+            "type": "timeline",
+            "notes": "These are the timeline notes",
+            "start": 62.5,
+            "end": 87.5,
+            "color": "orangered"
+        }
     },
-    {
-        "label": "Timeline B",
-        "notes": "These are the timeline notes",
-        "start": 25,
-        "end": 75,
-        "color": "cornflowerblue",
-        "events": [
-            {
-                "label": "Event B",
-                "notes": "These are the event notes."
-            }
-        ]
-    },
-    {
-        "label": "Timeline C",
-        "notes": "These are the timeline notes",
-        "start": 50,
-        "end": 100,
-        "color": "gold",
-        "events": [
-            {
-                "label": "Event C",
-                "notes": "These are the event notes."
-            }
-        ]
-    },
-    {
-        "label": "Timeline D",
-        "notes": "These are the timeline notes",
-        "start": 12.5,
-        "end": 37.5,
-        "color": "forestgreen",
-        "events": [
-            {
-                "label": "Event D",
-                "notes": "These are the event notes."
-            }
-        ]
-    },
-    {
-        "label": "Timeline E",
-        "notes": "These are the timeline notes",
-        "start": 37.5,
-        "end": 62.5,
-        "color": "MediumVioletRed ",
-        "events": [
-            {
-                "label": "Event E",
-                "notes": "These are the event notes."
-            }
-        ]
-    },
-    {
-        "label": "Timeline F",
-        "notes": "These are the timeline notes",
-        "start": 62.5,
-        "end": 87.5,
-        "color": "orangered",
-        "events": [
-            {
-                "label": "Event F",
-                "notes": "These are the event notes."
-            }
-        ]
+    "events": {
+        "Event A1": {
+            "label": "Event A1",
+            "type": "event",
+            "timelines": ["Timeline A"],
+            "notes": "These are the event notes."
+        },
+        "Event A2": {
+            "label": "Event A2",
+            "type": "event",
+            "timelines": ["Timeline A"],
+            "notes": "These are the event notes."
+        },
+        "Event A3": {
+            "label": "Event A3",
+            "type": "event",
+            "timelines": ["Timeline A"],
+            "notes": "These are the event notes."
+        },
+        "Event B1": {
+            "label": "Event B1",
+            "type": "event",
+            "timelines": ["Timeline B"],
+            "notes": "These are the event notes."
+        },
+        "Event B2": {
+            "label": "Event B2",
+            "type": "event",
+            "timelines": ["Timeline B"],
+            "notes": "These are the event notes."
+        },
+        "Event C": {
+            "label": "Event C",
+            "type": "event",
+            "timelines": ["Timeline C"],
+            "notes": "These are the event notes."
+        },
+        "Event D": {
+            "label": "Event D",
+            "type": "event",
+            "timelines": ["Timeline D"],
+            "notes": "These are the event notes."
+        },
+        "Event E": {
+            "label": "Event E",
+            "type": "event",
+            "timelines": ["Timeline E"],
+            "notes": "These are the event notes."
+        },
+        "Event F": {
+            "label": "Event F",
+            "type": "event",
+            "timelines": ["Timeline F"],
+            "notes": "These are the event notes."
+        }
     }
-]
+}
