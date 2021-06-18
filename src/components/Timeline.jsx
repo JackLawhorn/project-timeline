@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFolderOpen, faClipboard, faBars, faInfo, faSearch, faTimes, faEye, faEyeSlash, faExpand, faCompress, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import {  } from '@fortawesome/free-regular-svg-icons';
 
+import ProjectMap from '../data/ProjectMap.ts';
+
 import MainOverlay from './overlays/MainOverlay';
 import SearchOverlay from './overlays/SearchOverlay';
 
@@ -17,7 +19,7 @@ class Timeline extends React.Component {
             const timelines = event.timelines.map(key => source.timelines[key]);
             let earliestDate, latestDate;
             timelines.forEach(function(val, i) {
-                if(i == 0) {
+                if(earliestDate===undefined) {
                     earliestDate = val.start;
                     latestDate = val.end;
                     return;
@@ -30,13 +32,13 @@ class Timeline extends React.Component {
         });
 
         this.state = {
-            source: source,
-            selectedTimeline: null,
-            selectedEvent: null,
+            source: new ProjectMap(source),
+            selectedTimeline: undefined,
+            selectedEvent: undefined,
             overlay: "none",
             fullscreen: false,
             
-            disabledArray: Array(props.source.length).fill(false),
+            disabledArray: Array(Object.values(props.source.timelines).length).fill(false),
             trackPosn: -1,
             scrollPosn: 0,
             zoom: 1,
@@ -55,19 +57,27 @@ class Timeline extends React.Component {
             aspectRatio: props.aspectRatio,
         };
         
-        this.isTracked = this.isTracked.bind(this);
+        // Select handlers
         this.handleSelect = this.handleSelect.bind(this);
+        this.handleSelectProject = this.handleSelectProject.bind(this);
         this.handleSelectTimeline = this.handleSelectTimeline.bind(this);
         this.handleSelectEvent = this.handleSelectEvent.bind(this);
+        
+        // Tracking and scrolling handlers
+        this.isTracked = this.isTracked.bind(this);
         this.handleToggleLine = this.handleToggleLine.bind(this);
         this.handleTrack = this.handleTrack.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.handleZoomIn = this.handleZoomIn.bind(this);
         this.handleZoomOut = this.handleZoomOut.bind(this);
         this.handleDragToZoom = this.handleDragToZoom.bind(this);
-        this.handleClearState = this.handleClearState.bind(this);
+        
+        // Major state change handlers
         this.toggleFullscreen = this.toggleFullscreen.bind(this);
+        this.handleClearState = this.handleClearState.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
+        
+        // Export button handlers
         this.handleSaveToFile = this.handleSaveToFile.bind(this);
         this.handleCopyAsJSON = this.handleCopyAsJSON.bind(this);
     }
@@ -93,57 +103,18 @@ class Timeline extends React.Component {
 
     /**
      * Finds the selected Timeline and Event objects from their labels
-     * @returns {object} an object containing selectedTimeline and selectedEvent (both defaulting to null)
+     * @returns {object} an object containing selectedTimeline and selectedEvent (both defaulting to undefined)
      */
     get selectedObject() {
-        let result = {timeline: null, event: null, };
+        let result = {timeline: undefined, event: undefined, };
         const { source, selectedTimeline: selectedTimelineLabel, selectedEvent: selectedEventLabel } = this.state;
-        if(selectedTimelineLabel === null) return result;
+        if(selectedTimelineLabel === undefined) return result;
 
-        result.timeline = source.timelines[selectedTimelineLabel];
-        if(selectedEventLabel === null) return result;
+        result.timeline = source.get(selectedTimelineLabel);
+        if(selectedEventLabel === undefined) return result;
 
-        result.event = source.events[selectedEventLabel];
+        result.event = source.get(selectedTimelineLabel, selectedEventLabel);
         return result;
-    }
-
-    /**
-     * Returns a sorted array of unique numbers representing the start and end dates of all Timelines
-     * @returns {Array<number>} Sorted array of unique numbers representing the start and end dates of all Timelines 
-     */
-    get allUniqueDates() {
-        let datesList = [];
-        Object.values(this.state.source.timelines).forEach(function(line) {
-            if(!(line.start in datesList)) datesList.push(line.start);
-            if(!(line.end in datesList)) datesList.push(line.end);
-        });
-        datesList.sort((a, b) => a-b);
-        return datesList;
-    }
-
-    /**
-     * Finds the earliest date, latest date, and total length between all Timelines
-     * @returns {object} an object containing earliestDate, latestDate, and totalLength
-     */
-    get boundsAndLength() {
-        let earliestDate = undefined,
-            latestDate = undefined;
-        Object.values(this.state.source.timelines).forEach(function(line) {
-            if(earliestDate === undefined) {
-                earliestDate = line.start;
-                latestDate = line.end;
-            }
-            else {
-                if(line.start < earliestDate) earliestDate = line.start;
-                if(line.end > latestDate) latestDate = line.end;
-            }
-        });
-
-        return {
-            earliestDate: earliestDate,
-            latestDate: latestDate,
-            totalLength: (latestDate-earliestDate),
-        }
     }
 
     /**
@@ -157,7 +128,7 @@ class Timeline extends React.Component {
     
         const component = $(".timeline");
         const { scrollPosn, zoom } = this.state,
-            totalLength = this.boundsAndLength.totalLength,
+            totalLength = this.state.source.boundsAndLength.totalLength,
             canvasLeft = canvas.position().left,
             componentLeft = component.position().left,
             paddingOffset = parseInt(canvas.css("padding-left")),
@@ -176,8 +147,8 @@ class Timeline extends React.Component {
         const component = $(".timeline"),
             lineWrapper = $(".timeline > .timeline-item > .line-container > .line-wrapper");
         const { zoom, scrollPosn } = this.state,
-              { earliestDate, latestDate, totalLength } = this.boundsAndLength,
-              linesLeft = lineWrapper[0].getBoundingClientRect().left,
+              { earliestDate, latestDate, totalLength } = this.state.source.boundsAndLength,
+              linesLeft = lineWrapper[0]?.getBoundingClientRect()?.left,
               componentLeft = component.position().left,
               linesWidth = lineWrapper.width();
 
@@ -204,25 +175,32 @@ class Timeline extends React.Component {
     /**
      * Handles the selecting of Timeline or Event objects
      * @param {string} timelineLabel - the label of the selected Timeline or the Timeline of the selected Object
-     * @param {string} eventLabel - the label of the selected Event (defaults to null)
+     * @param {string} eventLabel - the label of the selected Event (defaults to undefined)
      * @param {string} overlayPipeline - the label of the overlay that should be shown on-selection (defaults to the current overlay)
      * @param {function} callback - the callback that should be called on-selection (defaults to an empty function)
      */
-    handleSelect(timelineLabel, eventLabel = null, overlayPipeline = this.state.overlay, callback = () => {}) {
+    handleSelect(timelineLabel, eventLabel = undefined, callback = () => {}) {
         this.setState({
             selectedTimeline: timelineLabel,
             selectedEvent: eventLabel,
-            overlay: overlayPipeline,
+            overlay: "main",
         }, callback());
     }
+    /**
+     * Handles the navigating to the root Project
+     * @param {event} e - the event that initated the selection; used for identifying the selected Timeline
+     * @helper {@link Timeline#handleSelect}
+     */
+     handleSelectProject(e) { this.handleSelect(undefined); }
     /**
      * Handles the selection of Timelines
      * @param {event} e - the event that initated the selection; used for identifying the selected Timeline
      * @helper {@link Timeline#handleSelect}
      */
-    handleSelectTimeline(e) {
-        const timeline = $(e.target).closest(".timeline-item").attr("label");
-        this.handleSelect(timeline, null, "main");
+     handleSelectTimeline(e) {
+        let timelineLabel = $(e.target).closest("[label]").attr("label");
+
+        this.handleSelect(timelineLabel);
     }
     /**
      * Handles the selection of Events
@@ -230,10 +208,10 @@ class Timeline extends React.Component {
      * @helper {@link Timeline#handleSelect}
      */
     handleSelectEvent(e) {
-        const timeline = $(e.target).closest(".timeline-item").attr("label"),
-              event = $(e.target).attr("label");
+        let timelineLabel = $(e.target).attr("parent"),
+            eventLabel = $(e.target).attr("label");
 
-        this.handleSelect(timeline, event, "main");
+        this.handleSelect(timelineLabel, eventLabel);
     }
 
     /**
@@ -242,7 +220,7 @@ class Timeline extends React.Component {
      */
     handleZoom(delta) {
         const { zoom: oldZoom, scrollPosn } = this.state;
-        const { totalLength } = this.boundsAndLength,
+        const { totalLength } = this.state.source.boundsAndLength,
               newZoom = Math.max(1, Math.min(2, oldZoom + delta));
             
         this.setState({
@@ -287,7 +265,7 @@ class Timeline extends React.Component {
         }
         else if(e.shiftKey) {
             const { scrollPosn, zoom } = this.state,
-                  { earliestDate, latestDate, totalLength } = this.boundsAndLength;
+                  { earliestDate, latestDate, totalLength } = this.state.source.boundsAndLength;
             const delta = (e.deltaY < 0 ? -1 : 1)*totalLength/20;
             
             this.setState({
@@ -301,13 +279,11 @@ class Timeline extends React.Component {
      * @param {event} e - the event that initated the tracking; used for identifying the snapped Event
      */
     snapToEvent(e) {
-        const timeline = $(e.target).closest(".timeline-item").attr("label"),
-              event = $(e.target).attr("label"),
-              trackPosn = $(e.target).attr("posn");
+        const trackPosn = $(e.target).attr("posn");
             
         this.setState({
             trackPosn: trackPosn,
-        }, this.handleSelect(timeline, event));
+        });
     }
     /**
      * Handles tracking in the Timelines view
@@ -315,12 +291,15 @@ class Timeline extends React.Component {
      * @helper {@link Timeline#snapToEvent}
      */
     handleTrack(e) {
-        let validEventTypes = ["click", "mousedown", "mousemove", "touchmove"];
+        const validEventTypes = ["click", "mousedown", "mousemove", "touchmove"];
         if($(e.target).is(".timeline-bottom *") ||
+            $(e.target).is(".timeline-item > .line-label *") ||
+            ($(e.target).is(".line-event") && e.type === "click") ||
             validEventTypes.indexOf(e.type) < 0 ||
             (e.type==="touchmove" && !this.state.readyForTrack) ||
             e.buttons !== 1) return;
-        if($(e.target).hasClass("line-event")) return this.snapToEvent(e);
+        if($(e.target).hasClass("line-event") && ["mousemove", "touchmove"].indexOf(e.type) >= 0)
+            return this.snapToEvent(e);
 
         const x = e.type === 'touchmove' ?
                   e.touches[0].clientX :
@@ -343,7 +322,7 @@ class Timeline extends React.Component {
      */
     handleToggleLine(e) {
         let disabledArray = this.state.disabledArray.concat([]);
-        Object.values(this.state.source.timelines).forEach(function(line, i) {
+        this.state.source.forEachTimeline(function(line, i) {
             if(line.label === $(e.target).closest(".timeline-item").attr("label"))
                 disabledArray[i] = !disabledArray[i];
         })
@@ -359,8 +338,8 @@ class Timeline extends React.Component {
         if(this.state.overlay !== "none") this.closeOverlay();
         else this.setState({
             trackPosn: -1,
-            selectedTimeline: null,
-            selectedEvent: null,
+            selectedTimeline: undefined,
+            selectedEvent: undefined,
             zoom: 1,
         });
     }
@@ -416,7 +395,7 @@ class Timeline extends React.Component {
      */
     handleSaveToFile() {
         let element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state.source)));
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.state.source.getOriginal)));
         element.setAttribute('download', "timeline.json");       
         element.style.display = 'none';
         document.body.appendChild(element);
@@ -430,7 +409,7 @@ class Timeline extends React.Component {
     handleCopyAsJSON() {
         let element = document.createElement('input');
         element.setAttribute("type", "text");
-        element.value = JSON.stringify(this.state.source);
+        element.value = JSON.stringify(this.state.source.getOriginal);
         document.body.appendChild(element);
         element.select();
         element.setSelectionRange(0, 99999); /* For mobile devices */
@@ -482,16 +461,17 @@ class Timeline extends React.Component {
               },
 
               // Get all necessary values from complex getters
-              earliestDate = this.boundsAndLength.earliestDate + this.state.scrollPosn,
-              totalLength = this.boundsAndLength.totalLength,
+              earliestDate = this.state.source.boundsAndLength.earliestDate + this.state.scrollPosn,
+              totalLength = this.state.source.boundsAndLength.totalLength,
               selectedObject = this.selectedObject,
               trackCoord = this.posnToCoord(this.state.trackPosn),
-              allUniqueDates = this.allUniqueDates,
+              allUniqueDates = this.state.source.allUniqueDates,
               isTracked = this.isTracked,
               
               // Get all necessary timeline control methods
-              handleSelect = this.handleSelect,
+              handleSelectProject = this.handleSelectProject,
               handleSelectTimeline = this.handleSelectTimeline,
+              handleSelectEvent = this.handleSelectEvent,
               handleScroll = this.handleScroll,
               handleDragToZoom = this.handleDragToZoom,
               handleToggleLine = this.handleToggleLine,
@@ -510,6 +490,8 @@ class Timeline extends React.Component {
               // Get all necessary DOM-based values
               linesLeft = $("ul.timeline > .timeline-item > .line-container").position()?.left ?? 0;
         
+        const selectHandlers = { handleSelectProject, handleSelectTimeline, handleSelectEvent };
+        
         return (
             <div className="timeline-container" theme={"light"} style={styleProps} tabIndex="0"
                  fullscreen={this.state.fullscreen===true?"fullscreen":undefined}
@@ -517,12 +499,12 @@ class Timeline extends React.Component {
                  onMouseUp={(e) => {this.setState({ mouseDown: null, })}}
                  onKeyDown={handleKeyPress} >
                 <header className="timeline-container-header">
-                    <button className="menu-button" onClick={toggleMenu}>
+                    <button className="scale-icon menu-button" onClick={toggleMenu}>
                         <FontAwesomeIcon icon={this.state.overlay==="none"?faBars:faTimes} />
                         <span>{this.state.overlay==="none"?"Menu":"Close"}</span>
                     </button>
-                    <div className="project-title">Project Timelines</div>
-                    <button className="expand-collapse-button" onClick={toggleFullscreen}>
+                    <div className="project-title">{source.label}</div>
+                    <button className="scale-icon expand-collapse-button" onClick={toggleFullscreen}>
                         <FontAwesomeIcon icon={this.state.fullscreen===true?faCompress:faExpand} />
                         <span>{this.state.fullscreen===true?"Collapse":"Expand"}</span>
                     </button>
@@ -532,27 +514,27 @@ class Timeline extends React.Component {
                         {
                             overlay !== "none" &&
                                 <ul className="menu-overlay">
-                                    <li className="search-button" tabIndex={overlay==="none"?"-1":"0"}
+                                    <li className="scale-icon search-button" tabIndex={overlay==="none"?"-1":"0"}
                                         isopen={overlay==="search"?"true":undefined} onClick={openSearch} >
                                         <FontAwesomeIcon icon={faSearch} />
                                         <span>Search</span>
                                     </li>
-                                    <li className="open-navigation" tabIndex={overlay==="none"?"-1":"0"}
+                                    <li className="scale-icon open-navigation" tabIndex={overlay==="none"?"-1":"0"}
                                         isopen={overlay==="main"?"true":undefined} onClick={openNavigation} >
                                         <FontAwesomeIcon icon={faFolderOpen} />
                                         <span>Navigation view</span>
                                     </li>
-                                    <li className="save-button" tabIndex={overlay==="none"?"-1":"0"}
+                                    <li className="scale-icon save-button" tabIndex={overlay==="none"?"-1":"0"}
                                         onClick={handleSaveToFile} >
                                         <FontAwesomeIcon icon={faFileDownload} />
                                         <span>Download as file</span>
                                     </li>
-                                    <li className="copy-button" tabIndex={overlay==="none"?"-1":"0"}
+                                    <li className="scale-icon copy-button" tabIndex={overlay==="none"?"-1":"0"}
                                         onClick={handleCopyAsJSON} >
                                         <FontAwesomeIcon icon={faClipboard} />
                                         <span>Copy as JSON</span>
                                     </li>
-                                    {/* <li className="about-button" tabIndex={overlay==="none"?"-1":"0"} >
+                                    {/* <li className="scale-icon about-button" tabIndex={overlay==="none"?"-1":"0"} >
                                         <FontAwesomeIcon icon={faInfo} />
                                         <span>About</span>
                                     </li> */}
@@ -561,20 +543,20 @@ class Timeline extends React.Component {
                         {
                             overlay === "main" &&
                                 <MainOverlay
-                                    source={this.state.source}
+                                    source={source}
                                     selectedObject={selectedObject}
-                                    handleSelect={handleSelect} />
+                                    selectHandlers={selectHandlers} />
                         }
                         {
                             overlay === "search" &&
                                 <SearchOverlay
-                                    source={this.state.source}
-                                    handleSelect={handleSelect} />
+                                    source={source}
+                                    selectHandlers={selectHandlers} />
                         }
                     </div>
                     <ul className="timeline" dragging={mouseDown!==null ? "dragging" : undefined} onWheel={handleScroll} >
                         <li className="timeline-item ruler-container">
-                            <div></div>
+                            <div />
                             <div className="ruler">
                                 <div className="ruler-wrapper">
                                     {
@@ -588,16 +570,17 @@ class Timeline extends React.Component {
                             </div>
                         </li>
                         {
-                            Object.values(source.timelines).map((line, i) =>
+                            source.mapTimelines((line, i) =>
                                 <li className="timeline-item" label={line.label} key={i}
                                     disabled={disabledArray[i] ? "disabled" : undefined}
                                     tracked={isTracked(line) ? "tracked" : undefined}>
                                     <div className="line-label" title={line.label}
                                         style={{ "color": line.color }}>
-                                        <button className="line-toggle" tabIndex={overlay==="none"?"0":"-1"} onClick={handleToggleLine}>
+                                        <button className="scale-icon line-toggle" tabIndex={overlay==="none"?"0":"-1"} onClick={handleToggleLine}>
                                             <FontAwesomeIcon icon={disabledArray[i] ? faEyeSlash : faEye} />
                                         </button>
-                                        <button className="line-name" tabIndex={overlay==="none"?"0":"-1"} onClick={handleSelectTimeline}>
+                                        <button className="line-name link-button" tabIndex={overlay==="none"?"0":"-1"}
+                                            label={line.label} onClick={handleSelectTimeline}>
                                             <span>{line.label}</span>
                                         </button>
                                     </div>
@@ -626,16 +609,14 @@ class Timeline extends React.Component {
                                                         />
                                                 }
                                                 {
-                                                    Object.values(source.events).filter(
-                                                        event => event.timelines.indexOf(line.label) >= 0
-                                                    ).map((event, j) =>
+                                                    source.getChildEvents(line.label).map((event, j) =>
                                                         event.posn >= scrollPosn &&
                                                             <g key={j}>
                                                                 <circle className="line-event" posn={event.posn} label={event.label} tabIndex={!disabledArray[i] && isTracked(line) && overlay==="none" ? "0" : undefined}
                                                                     stroke={line.color} cy="50%" cx={100*(event.posn - earliestDate)/(totalLength/zoom) + "%"}
                                                                     onMouseOver={(e) => !(line.label===selectedTimeline && event.label===selectedEvent) && e.target.setAttribute('r', '0.75em') }
                                                                     onMouseOut={(e) => !(line.label===selectedTimeline && event.label===selectedEvent) && e.target.setAttribute('r', '0.5em') }
-                                                                    onClick={this.handleSelectEvent} >
+                                                                    parent={line.label} onClick={handleSelectEvent} >
                                                                 </circle>
                                                                 <line y1="50%" y2="0%"
                                                                     x1={100*(event.posn - earliestDate)/(totalLength/zoom) + "%"}
@@ -686,7 +667,7 @@ class Timeline extends React.Component {
                             </div>
                             {
                                 trackPosn >= 0 && (
-                                    <button className="clear-button" onClick={handleClearState}>
+                                    <button className="scale-icon clear-button" onClick={handleClearState}>
                                         <FontAwesomeIcon icon={faTimes} />
                                         <span>Clear selected</span>
                                     </button>

@@ -1,8 +1,7 @@
 import React from 'react';
-import $ from 'jquery';
 
-import { TimelineItemList, generateList, translateItem } from '../TimelineItemList';
-import Breadcrumbs from '../Breadcrumbs';
+import { TimelineItemList, generateList } from '../bits/TimelineItemList';
+import Breadcrumbs from '../bits/Breadcrumbs';
 
 class MainOverlay extends React.Component {
     constructor(props) {
@@ -16,11 +15,7 @@ class MainOverlay extends React.Component {
             hasMounted: false,
         };
 
-        this.handleSelect = props.handleSelect;
-        
-        this.handleGoToProjectRoot = this.handleGoToProjectRoot.bind(this);
-        this.handleSelectTimeline = this.handleSelectTimeline.bind(this);
-        this.handleSelectEvent = this.handleSelectEvent.bind(this);
+        this.selectHandlers = props.selectHandlers;
     }
 
     componentDidMount() {
@@ -39,34 +34,13 @@ class MainOverlay extends React.Component {
 
     get getAllChildren() {
         const { selectedTimeline, selectedEvent, } = this.state,
-            sort = (a, b) => a > b;
-
-        console.log(selectedTimeline);
+            sort = (a, b) => (a.start ?? a.posn) > (b.start ?? b.posn);
         
-        if(selectedTimeline === null)
+        if(selectedTimeline === undefined)
             return generateList(this.state.source, () => true, () => false, sort);
-        else if(selectedTimeline !== null && selectedEvent === null)
+        else if(selectedTimeline !== undefined && selectedEvent === undefined)
             return generateList(this.state.source, () => false, (event) => event.timelines.indexOf(selectedTimeline.label) >= 0, sort);
-    }
-
-    handleGoToProjectRoot(e) {
-        this.handleSelect(null);
-    }
-
-    handleSelectTimeline(e) {
-        let timelineLabel = $(e.target).closest("[timeline]").attr("timeline");
-
-        this.handleSelect(timelineLabel);
-    }
-
-    handleSelectEvent(e) {
-        let eventLabel = "";
-        if($(e.target).hasClass("event-select"))
-            eventLabel = $(e.target).attr("value");
-        else
-            eventLabel = $(e.target).closest(".list-item").attr("value");
-
-        this.handleSelect(this.state.selectedTimeline.label, eventLabel);
+        return [];
     }
 
     render() {
@@ -79,21 +53,18 @@ class MainOverlay extends React.Component {
     }
 
     fullRender() {
-        const { selectedTimeline, selectedEvent } = this.state,
-              handleSelect = this.handleSelect,
-              handleSelectTimeline = this.handleSelectTimeline;
+        const { source, selectedTimeline, selectedEvent } = this.state,
+              selectHandlers = this.selectHandlers;
         
         let allChildren = this.getAllChildren,
-            selectedObject = this.state.selectedEvent ?? this.state.selectedTimeline ?? this.state.source;
-        if(selectedTimeline !== null) selectedObject.timeline = selectedTimeline.label;
+            selectedObject = source.get(selectedTimeline?.label, selectedEvent?.label);
 
         return (
             <div className="main-overlay">
                 {
                     selectedObject.type !== "project" &&
-                        <Breadcrumbs item={translateItem(selectedObject, selectedTimeline)}
-                            handleSelect={handleSelect}
-                            handleSelectTimeline={handleSelectTimeline} /> 
+                        <Breadcrumbs item={source.get(selectedTimeline?.label, selectedEvent?.label)}
+                            selectHandlers={selectHandlers} /> 
                 }
                 <div className="notes-section">
                     <div className="selected-label">{ selectedObject.label }</div>
@@ -101,11 +72,12 @@ class MainOverlay extends React.Component {
                 </div>
                 <div className="hr" />
                 {
-                    selectedEvent===null &&
+                    selectedEvent === undefined &&
                         <TimelineItemList
                             list={allChildren}
                             label="children"
-                            handleSelect={handleSelect} /> }
+                            showDetails={false}
+                            selectHandlers={selectHandlers} /> }
             </div>
         )
     }

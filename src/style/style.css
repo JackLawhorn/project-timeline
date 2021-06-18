@@ -63,19 +63,6 @@
   transition: 0.2s ease;
 }
 
-.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-name {
-  margin-left: -2ch;
-  font-weight: bold;
-  -webkit-transition: opacity 0.2s ease;
-  transition: opacity 0.2s ease;
-}
-
-.timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-label > .line-name:is(:hover, :focus):not(:active) {
-  text-decoration: underline;
-  text-decoration-thickness: 0.15em;
-  text-underline-offset: 0.25em;
-}
-
 .timeline-container > .timeline-container-body > .timeline > .timeline-item > .line-container {
   width: 99%;
   padding: 0 2em 0 1em;
@@ -354,59 +341,6 @@
   display: none;
 }
 
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs {
-  margin: 0;
-  font-weight: normal;
-  outline: none;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > * {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > * + * {
-  margin-left: 1ch;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > svg {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select {
-  padding: 1.25rem 1.5rem;
-  color: inherit;
-  font-size: inherit;
-  background: transparent;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  -webkit-transition: 0.2s ease;
-  transition: 0.2s ease;
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select:hover:not(:active), .timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select:focus,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select:focus,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select:hover:not(:active),
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select:focus {
-  background-color: rgba(255, 255, 255, 0.125);
-}
-
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .clear-select > option,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .timeline-select > option,
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs > .event-select > option {
-  color: black;
-}
-
 .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
   padding-bottom: 1em;
 }
@@ -507,6 +441,7 @@
 .timeline-container .overlay-layer .timeline-item-list .list-header .list-detail-toggle {
   font-size: inherit;
   border: none;
+  outline: none;
   background: transparent;
   cursor: pointer;
 }
@@ -521,53 +456,73 @@
 }
 
 .timeline-container .overlay-layer .timeline-item-list .list-body {
-  display: table;
-  width: 100%;
+  margin: 0px;
+  padding: 0px;
   border-collapse: collapse;
 }
 
 .timeline-container .overlay-layer .timeline-item-list .list-item {
-  display: table-row;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  width: 100%;
   color: white;
-  border-bottom: 0.25em dotted rgba(255, 255, 255, 0.125);
   outline: none;
 }
 
-.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active) {
+.timeline-container .overlay-layer .timeline-item-list .list-item:not(:last-child) {
+  border-bottom: 0.125em solid rgba(255, 255, 255, 0.125);
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus-within):not(:active) {
   background: -webkit-gradient(linear, left top, right top, from(transparent), color-stop(rgba(255, 255, 255, 0.03125)), to(transparent));
   background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03125), transparent);
 }
 
-.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active):not([eventlabel]) > .item-summary-cell {
-  border-left-width: 1.5em !important;
-  padding-left: 1em;
-}
-
-.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus):not(:active)[eventlabel] > .item-summary-cell {
+.timeline-container .overlay-layer .timeline-item-list .list-item:is(:hover, :focus-within):not(:active) .item-summary-cell {
   padding-left: 2em;
 }
 
-.timeline-container .overlay-layer .timeline-item-list .list-item .item-summary-cell {
+.timeline-container .overlay-layer .timeline-item-list .list-item > * {
+  padding: 1em;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item > * * {
+  color: white;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item > *.item-summary-cell {
+  -ms-flex-preferred-size: 75%;
+      flex-basis: 75%;
   -webkit-transition: 0.2s ease;
   transition: 0.2s ease;
-  border-left: 0px solid transparent;
 }
 
-.timeline-container .overlay-layer .timeline-item-list .list-item:not([eventlabel]) > .item-summary-cell {
-  border-left-width: 0.5em !important;
-  padding-left: 1em !important;
-}
-
-.timeline-container .overlay-layer .timeline-item-list .list-item > :not(.item-summary-cell) {
-  vertical-align: middle;
+.timeline-container .overlay-layer .timeline-item-list .list-item > *:not(.item-summary-cell) {
+  -ms-flex-preferred-size: 25%;
+      flex-basis: 25%;
   font-size: 1.5em;
   text-align: center;
   opacity: 0.25;
 }
 
-.timeline-container .overlay-layer .timeline-item-list .list-item > * {
-  display: table-cell;
-  padding: 1em;
+.timeline-container .overlay-layer .timeline-item-list .list-item[type=timeline] > .item-summary-cell::before {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  right: unset;
+  width: 0.5em;
+  background: currentColor;
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container .overlay-layer .timeline-item-list .list-item[type=timeline]:is(:hover, :focus-within) > .item-summary-cell::before {
+  width: 1em;
 }
 
 .timeline-container .overlay-layer .timeline-item-list .list-item .item-label {
@@ -599,16 +554,6 @@
 
 .timeline-container .overlay-layer .parent-label > svg:last-of-type {
   opacity: 0.25;
-}
-
-.timeline-container .link-button {
-  cursor: pointer;
-}
-
-.timeline-container .link-button:is(:hover, :focus):not(:active) {
-  text-decoration: underline;
-  text-decoration-thickness: 0.15em;
-  text-underline-offset: 0.25em;
 }
 
 :root {
@@ -690,10 +635,10 @@ body .App {
 
 .timeline-container > .timeline-container-header > * {
   padding: 1em;
+  white-space: nowrap;
 }
 
 .timeline-container > .timeline-container-header > .project-title {
-  white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
   -webkit-box-flex: 1;
@@ -731,5 +676,33 @@ body .App {
 .timeline-container > .timeline-container-header > .expand-collapse-button > svg:first-child {
   width: 2ch;
   margin-right: 1ch;
+}
+
+.timeline-container .link-button {
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+}
+
+.timeline-container .link-button:is(:hover, :focus):not(:active) {
+  text-decoration: underline;
+  text-decoration-thickness: 0.15em;
+  text-underline-offset: 0.25em;
+}
+
+.timeline-container .link-button.line-name {
+  margin-left: -2ch;
+  -webkit-transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease;
+}
+
+.timeline-container .scale-icon > svg:first-child {
+  -webkit-transition: 0.2s ease;
+  transition: 0.2s ease;
+}
+
+.timeline-container .scale-icon:is(:hover, :focus-within):not(:active) > svg:first-child {
+  -webkit-transform: scale(1.25);
+          transform: scale(1.25);
 }
 /*# sourceMappingURL=style.css.map */

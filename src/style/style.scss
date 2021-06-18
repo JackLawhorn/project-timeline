@@ -72,10 +72,10 @@ body {
 
         & > * {
             padding: 1em;
+            white-space: nowrap;
         }
 
         & > .project-title {
-            white-space: nowrap;
             text-overflow: ellipsis;
             overflow: hidden;
             flex-grow: 1;
@@ -88,7 +88,6 @@ body {
             border: none;
             cursor: pointer;
             outline: none;
-
 
             &:not(:hover):not(:focus) {
                 opacity: 0.5;
@@ -104,5 +103,29 @@ body {
 
             @include has-left-icon;
         }
+    }
+
+    .link-button {
+        font-weight: bold;
+        outline: none;
+        cursor: pointer;
+    
+        &:is(:hover, :focus):not(:active) {
+            text-decoration: underline;
+            text-decoration-thickness: 0.15em;
+            text-underline-offset: 0.25em;
+        }
+
+        &.line-name {
+            margin-left: -2ch;
+            transition: opacity 0.2s ease;
+        }
+    }
+
+    .scale-icon > svg:first-child {
+        transition: 0.2s ease;
+    }
+    .scale-icon:is(:hover, :focus-within):not(:active) > svg:first-child {
+        transform: scale(1.25);
     }
 }

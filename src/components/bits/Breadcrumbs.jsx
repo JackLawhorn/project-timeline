@@ -11,8 +11,10 @@ class Breadcrumbs extends React.Component {
             item: props.item,
         };
 
-        this.handleSelect = props.handleSelect;
-        this.handleSelectTimeline = props.handleSelectTimeline;
+        this.selectHandlers = props.selectHandlers;
+        this.handleSelectProject = this.selectHandlers.handleSelectProject;
+        this.handleSelectTimeline = this.selectHandlers.handleSelectTimeline;
+        this.handleSelectEvent = this.selectHandlers.handleSelectEvent;
     }
     
     componentDidMount() {
@@ -27,13 +29,11 @@ class Breadcrumbs extends React.Component {
 
     render() {
         const item = this.state.item, 
-            handleSelectTimeline = this.handleSelectTimeline,
-            goToRoot = () => this.handleSelect(null, null, "main");
-
+            { handleSelectProject, handleSelectTimeline } = this;
 
         return (
             <div className="parent-label">
-                <span className="link-button" onClick={goToRoot}>
+                <span className="link-button" tabIndex="0" onClick={handleSelectProject}>
                     <FontAwesomeIcon icon={faHashtag} />
                     PROJECT
                 </span>
@@ -41,10 +41,10 @@ class Breadcrumbs extends React.Component {
 
                 {
                     item.type === "event" &&
-                        <span className="link-button" timeline={item.timeline}
+                        <span className="link-button" tabIndex="0" label={item.parentLabel}
                             style={{color: item.color}}
                             onClick={handleSelectTimeline}>
-                            {item.timeline}
+                            {item.parentLabel}
                         </span>
                 }
                 {

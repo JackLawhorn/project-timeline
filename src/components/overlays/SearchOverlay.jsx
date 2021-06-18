@@ -1,7 +1,6 @@
 import React from 'react';
-import $ from 'jquery';
 
-import { TimelineItemList, generateList } from '../TimelineItemList';
+import { TimelineItemList, generateList } from '../bits/TimelineItemList';
 
 class SearchOverlay extends React.Component {
     constructor(props) {
@@ -15,10 +14,8 @@ class SearchOverlay extends React.Component {
             hasMounted: false,
         };
 
-        this.handleSelect = props.handleSelect;
+        this.selectHandlers = props.selectHandlers;
 
-        this.handleSelectTimeline = this.handleSelectTimeline.bind(this);
-        this.handleSelectEvent = this.handleSelectEvent.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
     }
@@ -45,9 +42,9 @@ class SearchOverlay extends React.Component {
                 event.label.toLowerCase().indexOf(searchString) >= 0 ||
                 event.notes.toLowerCase().indexOf(searchString) >= 0,
             sort = (a, b) => {
-                if(a.obj.label > b.obj.label || (b.type==="timeline" && a.type==="event"))
+                if(a.label > b.label || (b.type==="timeline" && a.type==="event"))
                     return 1;
-                if(b.obj.label > a.obj.label || (a.type==="timeline" && b.type==="event"))
+                if(b.label > a.label || (a.type==="timeline" && b.type==="event"))
                     return -1;
                 return 0;
             };
@@ -56,22 +53,6 @@ class SearchOverlay extends React.Component {
         let results = generateList(this.state.source, timelineFilter, eventFilter, sort);
 
         return results;
-    }
-
-    handleSelectTimeline(e) {
-        let timelineLabel = "";
-        timelineLabel = $(e.target).closest(".search-results-item").attr("timelinelabel");
-
-        this.handleSelect(timelineLabel, null, "main");
-    }
-
-    handleSelectEvent(e) {
-        let timelineLabel = "",
-            eventLabel = "";
-        timelineLabel = $(e.target).closest(".search-results-item").attr("timelinelabel");
-        eventLabel = $(e.target).closest(".search-results-item").attr("eventlabel");
-
-        this.handleSelect(timelineLabel, eventLabel, "main");
     }
 
     handleSearch(e) {
@@ -101,7 +82,7 @@ class SearchOverlay extends React.Component {
 
     fullRender() {
         const { searchString, typeFilters } = this.state,
-            { handleSelect, handleSearch, handleFilter } = this,
+            { selectHandlers, handleSearch, handleFilter } = this,
             
             allItems = this.getAllItems.filter(item => {
                 return typeFilters.indexOf(item.type) >= 0
@@ -125,7 +106,11 @@ class SearchOverlay extends React.Component {
                         <option value="Events only">Events only</option>
                     </select>
                 </div>
-                <TimelineItemList list={allItems} handleSelect={handleSelect} label="results" />
+                <TimelineItemList
+                    list={allItems}
+                    label="results"
+                    showDetails={true}
+                    selectHandlers={selectHandlers} />
             </div>
         )
     }

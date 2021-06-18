@@ -91,51 +91,6 @@
     }
 }
 
-// Breadcrumbs element used in both Navigation and Notes overlays
-.timeline-container > .timeline-container-body > .overlay-layer .selected-breadcrumbs {
-    margin: 0;
-    font-weight: normal;
-    outline: none;
-    transition: 0.2s ease;
-
-    user-select: none;
-
-    & > * {
-        display: inline-block;
-        vertical-align: middle;
-    }
-    & > * + * {
-        margin-left: 1ch;
-    }
-    & > svg {
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    // Button/Select elements
-    & > .clear-select,
-    & > .timeline-select,
-    & > .event-select {
-        padding: 1.25rem 1.5rem;
-
-        color: inherit;
-        font-size: inherit;
-        background: transparent;
-        border: none;
-        outline: none;
-        cursor: pointer;
-
-        transition: 0.2s ease;
-
-        &:hover:not(:active), &:focus {
-            background-color: rgba(255, 255, 255, 0.125);
-        }
-
-        & > option {
-            color: black;
-        }
-    }
-}
-
 // The Naviation element shows a file explorer view
 .timeline-container > .timeline-container-body > .overlay-layer > .main-overlay {
     padding-bottom: 1em;
@@ -214,6 +169,7 @@
         .list-detail-toggle {
             font-size: inherit;
             border: none;
+            outline: none;
             background: transparent;
             cursor: pointer;
 
@@ -229,49 +185,62 @@
     }
 
     .list-body {
-        display: table;
-        width: 100%;
+        margin: 0px;
+        padding: 0px;
         border-collapse: collapse;
     }
 
     .list-item {
-        display: table-row;
+        display: flex;
+        align-items: center;
+        width: 100%;
         color: white;
-        border-bottom: 0.25em dotted rgba(255, 255, 255, 0.125);
         outline: none;
+
+        &:not(:last-child) {
+            border-bottom: 0.125em solid rgba(255, 255, 255, 0.125);
+        }
                 
-        &:is(:hover, :focus):not(:active) {
+        &:is(:hover, :focus-within):not(:active) {
             background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03125), transparent);
             
-            &:not([eventlabel]) > .item-summary-cell {
-                border-left-width: 1.5em !important;
-                padding-left: 1em;
-            }
-            
-            &[eventlabel] > .item-summary-cell {
+            .item-summary-cell {
                 padding-left: 2em;
             }
         }
         
-        .item-summary-cell {
-            transition: 0.2s ease;
-            border-left: 0px solid transparent;
-        }
-        &:not([eventlabel]) > .item-summary-cell {
-            border-left-width: 0.5em !important;
-            padding-left: 1em !important;
-        }
-        & > :not(.item-summary-cell) {
-            vertical-align: middle;
-            font-size: 1.5em;
-            text-align: center;
-            opacity: 0.25;
-        }
-
-
         & > * {
-            display: table-cell;
             padding: 1em;
+            
+            * {
+                color: white;
+            }
+            
+            &.item-summary-cell {
+                flex-basis: 75%;
+                transition: 0.2s ease;
+            }
+            &:not(.item-summary-cell) {
+                flex-basis: 25%;
+                font-size: 1.5em;
+                text-align: center;
+                opacity: 0.25;
+            }
+        }
+        &[type=timeline] {
+            & > .item-summary-cell::before {
+                    content: '';
+                    display: block;
+                    position: absolute;
+                    inset: 0;
+                    right: unset;
+                    width: 0.5em;
+                    background: currentColor;
+                    transition: 0.2s ease;
+            }
+            &:is(:hover, :focus-within) > .item-summary-cell::before {
+                width: 1em;
+            }
         }
 
         .item-label {
@@ -303,14 +272,5 @@
         &:last-of-type {
             opacity: 0.25;
         }
-    }
-}
-.timeline-container .link-button {
-    cursor: pointer;
-
-    &:is(:hover, :focus):not(:active) {
-        text-decoration: underline;
-        text-decoration-thickness: 0.15em;
-        text-underline-offset: 0.25em;
     }
 }

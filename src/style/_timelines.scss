@@ -63,18 +63,6 @@
                     @include transition-all;
                 }
             }
-
-            & > .line-name {
-                margin-left: -2ch;
-                font-weight: bold;
-                transition: opacity 0.2s ease;
-                
-                &:is(:hover, :focus):not(:active) {
-                    text-decoration: underline;
-                    text-decoration-thickness: 0.15em;
-                    text-underline-offset: 0.25em;
-                }
-            }
         }
 
         // The main part of the layer where the timeline is drawn
